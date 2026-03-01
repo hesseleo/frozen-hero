@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "frozen-hero"
+version = "1.0.0"
+description = "Raspberry Pi freezer inventory management system"
+requires-python = ">=3.11"
+dependencies = [
+    # picamera2 is NOT listed here — it is a system package installed via apt
+    # and made available through --system-site-packages in the venv.
+    "flask>=3.0",
+    "waitress>=3.0",
+    "RPi.GPIO",
+    "pyzbar",
+    "brother-ql",
+    "pillow",
+]
+
+[project.scripts]
+frozen-hero = "frozen_hero.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# ---------------------------------------------------------------------------
+# Ruff
+# ---------------------------------------------------------------------------
+[tool.ruff]
+src = ["src"]
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "UP",       # pyupgrade
+    "B",        # flake8-bugbear
+    "SIM",      # flake8-simplify
+    "PTH",      # flake8-use-pathlib
+    "S",        # flake8-bandit (security)
+    "LOG",      # flake8-logging
+    "G",        # flake8-logging-format
+]
+ignore = [
+    "S603",  # subprocess without shell=True — we explicitly use lists, this is safe
+    "S607",  # partial path for executables — expected for system tools like `convert`
+]
+
+# ---------------------------------------------------------------------------
+# Mypy
+# ---------------------------------------------------------------------------
+[tool.mypy]
+strict = true
+files = ["src"]
+
+[[tool.mypy.overrides]]
+module = [
+    "RPi.*",
+    "picamera2.*",
+    "pyzbar.*",
+    "brother_ql.*",
+]
+ignore_missing_imports = true
