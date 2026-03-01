@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Copyright (c) 2022 HeRo Developers
+# Author: Leonhard Hesse
+# Created: January 2023
+
+# Script to backup frozen-hero database to NAS
+
+MOUNT_POINT=/mnt/HeRoQnap/Backup
+DB_SRC=/home/hero/frozen-hero/database/frozen-hero.db
+DB_DST=$MOUNT_POINT/HeRoPi/frozen-hero-database/frozen-hero.db
+
+if ! mountpoint -q $MOUNT_POINT; then
+    if ! mount.cifs //hero-nas.hero.home/Backup $MOUNT_POINT \
+        -o uid=1000,gid=1000,file_mode=0640,dir_mode=0750,credentials=/home/hero/.nas-credentials; then
+        echo "Failed to mount NAS"
+        exit 1
+    fi
+fi
+
+if ! cp $DB_SRC $DB_DST; then
+    echo "Failed to backup database"
+    exit 1
+fi
+
+echo "Backup successful"

@@ -1,0 +1,7 @@
+[Unit]
+Description=frozen-hero Database Backup
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/home/hero/frozen-hero/backup/frozen-hero-db-backup
