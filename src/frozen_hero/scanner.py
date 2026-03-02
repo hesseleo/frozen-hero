@@ -32,7 +32,7 @@ class QRCodeScanner:
         self._timeout_timer: Timer | None = None
 
         self._chip = lgpio.gpiochip_open(0)
-        lgpio.gpio_claim_input(self._chip, config.PIN_MOTION_DETECTOR)
+        lgpio.gpio_claim_alert(self._chip, config.PIN_MOTION_DETECTOR, lgpio.RISING_EDGE)
         self._motion_cb = lgpio.callback(
             self._chip, config.PIN_MOTION_DETECTOR, lgpio.RISING_EDGE, self._on_motion
         )
