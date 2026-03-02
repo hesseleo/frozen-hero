@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime
 
-from flask import Flask, abort, jsonify, render_template, request, send_from_directory
+from flask import Flask, abort, jsonify, render_template, request
 
 from frozen_hero import config, db, label
 
@@ -19,22 +19,6 @@ def create_app() -> Flask:
         template_folder=str(config.TEMPLATES_DIR),
         static_folder=str(config.STATIC_DIR),
     )
-
-    # ------------------------------------------------------------------
-    # Static assets
-    # ------------------------------------------------------------------
-
-    @app.route("/favicon.png")
-    def favicon() -> object:
-        return send_from_directory(config.STATIC_DIR, "favicon.png", mimetype="image/png")
-
-    @app.route("/apple-touch-icon.png")
-    def touchicon() -> object:
-        return send_from_directory(config.STATIC_DIR, "apple-touch-icon.png", mimetype="image/png")
-
-    @app.route("/frozen-hero-logo.png")
-    def logo() -> object:
-        return send_from_directory(config.STATIC_DIR, "frozen-hero-logo.png", mimetype="image/png")
 
     # ------------------------------------------------------------------
     # Main UI
