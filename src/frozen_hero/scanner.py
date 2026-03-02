@@ -6,7 +6,7 @@ from threading import Lock, Thread, Timer
 from time import sleep
 
 import RPi.GPIO as GPIO
-from picamera2 import Picamera2
+from picamera2 import Picamera2  # type: ignore
 from pyzbar.pyzbar import decode
 
 from frozen_hero import config
