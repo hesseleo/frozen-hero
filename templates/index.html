@@ -1,173 +1,168 @@
 <!DOCTYPE html>
+<html>
 <head>
-   <title>frozen-hero</title>
    <meta charset="utf-8"/>
-   <link rel="icon" 
-      type="image/png" 
-      href="/favicon.png" />
+   <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+   <title>frozen-hero</title>
+   <link rel="icon" type="image/png" href="/favicon.png" />
+   <style>
+      .container {
+         max-width: 500px;
+         margin: 25px auto;
+         background-repeat: no-repeat;
+         background-position: center 0px;
+      }
+
+      .content {
+         font-size: 14pt;
+         font-family: 'Trebuchet MS', sans-serif;
+      }
+
+      .tab {
+         overflow: hidden;
+      }
+
+      /* Style the buttons that are used to open the tab content */
+      .tab button {
+         background-color: inherit;
+         float:none;
+         border: none;
+         outline: none;
+         cursor: pointer;
+         padding: 9px 11px;
+         transition: 0.3s;
+         margin: 0px;
+         font-family: 'Trebuchet MS', sans-serif;
+         font-size: 13pt;
+         border: rgb(3, 51, 53);
+         border-width: 2.5px;
+         border-style: solid;
+         border-top: none;
+         border-right: none;
+         border-left: none;
+         background-color: rgb(165, 163, 163);
+         margin-left: 5px;
+         margin-right: 5px;
+         color:rgb(3, 51, 53)
+      }
+
+      /* Change background color of buttons on hover */
+      .tab button:hover {
+         background-color: rgb(115, 170, 172);
+      }
+
+      /* Create an active/current tablink class */
+      .tab button.active {
+         background-color:rgb(3, 51, 53);
+         color:aliceblue;
+         border: aliceblue;
+         border-width: 2.5px;
+         border-style: solid;
+         border-top: none;
+         border-left: none;
+         border-right: none;
+      }
+
+      /* Style the tab content */
+      .tabcontent {
+         border-top: none;
+         text-align: center;
+      }
+      .center {
+         margin-left: auto;
+         margin-right: auto;
+      }
+
+      .column {
+         background-color: rgb(2, 25, 26);
+         font-size: 15pt;
+         padding: 0.7em 0.5em 0.7em 0.5em;
+         text-align: left;
+         color:aliceblue;
+         font-family: 'Trebuchet MS', sans-serif;
+      }
+
+      .cell {
+         padding: 0.7em 0.5em 0.7em 0.5em;
+         text-align: left;
+         color:aliceblue;
+         font-family: 'Trebuchet MS', sans-serif;
+      }
+
+      .cell_name {
+         padding: 0.7em 0.5em 0.7em 0.5em;
+         text-align: left;
+         color:aliceblue;
+         font-family: 'Trebuchet MS', sans-serif;
+         word-break:break-all;
+      }
+
+      .printButton {
+         font-size:17pt;
+         background-color: aliceblue;
+         font-weight:900;
+         border-radius: 40px;
+         margin-top:5px;
+         padding: 9px 17px 9px 17px;
+         cursor: pointer;
+         color:rgb(3, 51, 53);
+      }
+
+      .inputField {
+         border-radius:14px;
+         margin:5px;
+         font-size:15pt;
+         width:240px
+      }
+
+      .modal {
+         display: none; /* Hidden by default */
+         position: fixed; /* Stay in place */
+         z-index: 1; /* Sit on top */
+         left: 0;
+         top: 0;
+         width: 100%; /* Full width */
+         height: 100%; /* Full height */
+         overflow: auto; /* Enable scroll if needed */
+         background-color: rgb(0,0,0); /* Fallback color */
+         background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+      }
+
+      /* Modal Content/Box */
+      .modal-content {
+         background-color: #fefefe;
+         margin: 15% auto; /* 15% from the top and centered */
+         padding: 20px;
+         border: 1px solid #888;
+         max-width: 250px;
+      }
+
+      #my-select{
+         margin-top: 7px;
+      }
+
+      #select_amount{
+         margin-top: 7px;
+      }
+
+      tr:nth-child(even){
+         background-color: rgb(3, 51, 53)
+      }
+
+      .cellred {
+         padding: 0.7em 0.5em 0.7em 0.5em;
+         text-align: left;
+         color:aliceblue;
+         font-family: 'Trebuchet MS', sans-serif;
+         background-color: #570000;
+      }
+   </style>
 </head>
 
-<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<style>
-   .container {
-      max-width: 500px;
-      margin: 25px auto;
-      background-repeat: no-repeat;
-      background-position: center 0px;
-   }
+<body class="container" style="text-align:center; background-color:rgb(9, 81, 83);">
+   <div class="content">
+      <h1 style="color: aliceblue; margin-bottom: 30px;">frozen-hero</h1>
 
-   .content {
-      font-size: 14pt;
-      font-family: 'Trebuchet MS', sans-serif;
-   }
-
-   .tab {
-      overflow: hidden;
-   }
-
-   /* Style the buttons that are used to open the tab content */
-   .tab button {
-      background-color: inherit;
-      float:none;
-      border: none;
-      outline: none;
-      cursor: pointer;
-      padding: 9px 11px;
-      transition: 0.3s;
-      margin: 0px;
-      font-family: 'Trebuchet MS', sans-serif;
-      font-size: 13pt;
-      border: rgb(3, 51, 53);
-      border-width: 2.5px;
-      border-style: solid;
-      border-top: none;
-      border-right: none;
-      border-left: none;
-      background-color: rgb(165, 163, 163);
-      margin-left: 5px;
-      margin-right: 5px;
-      color:rgb(3, 51, 53)
-   }
-
-   /* Change background color of buttons on hover */
-   .tab button:hover {
-      background-color: rgb(115, 170, 172);
-   }
-
-   /* Create an active/current tablink class */
-   .tab button.active {
-      background-color:rgb(3, 51, 53);
-      color:aliceblue;
-      border: aliceblue;
-      border-width: 2.5px;
-      border-style: solid;
-      border-top: none;
-      border-left: none;
-      border-right: none;
-   }
-
-   /* Style the tab content */
-   .tabcontent {
-      border-top: none;
-      text-align: center;
-   }
-   .center {
-      margin-left: auto;
-      margin-right: auto;
-   }
-
-   .column {
-      background-color: rgb(2, 25, 26);
-      font-size: 15pt;
-      padding: 0.7em 0.5em 0.7em 0.5em;
-      text-align: left;
-      color:aliceblue;
-      font-family: 'Trebuchet MS', sans-serif;
-   }
-
-   .cell {
-      padding: 0.7em 0.5em 0.7em 0.5em;
-      text-align: left;
-      color:aliceblue;
-      font-family: 'Trebuchet MS', sans-serif;
-   }
-
-   .cell_name {
-      padding: 0.7em 0.5em 0.7em 0.5em;
-      text-align: left;
-      color:aliceblue;
-      font-family: 'Trebuchet MS', sans-serif;
-      word-break:break-all;
-   }
-
-   .printButton {
-      font-size:17pt;
-      background-color: aliceblue;
-      font-weight:900;
-      border-radius: 40px;
-      margin-top:5px;
-      padding: 9px 17px 9px 17px;
-      cursor: pointer;
-      color:rgb(3, 51, 53);
-   }
-
-   .inputField {
-      border-radius:14px;
-      margin:5px;
-      font-size:15pt;
-      width:240px
-   }
-
-   .modal {
-      display: none; /* Hidden by default */
-      position: fixed; /* Stay in place */
-      z-index: 1; /* Sit on top */
-      left: 0;
-      top: 0;
-      width: 100%; /* Full width */
-      height: 100%; /* Full height */
-      overflow: auto; /* Enable scroll if needed */
-      background-color: rgb(0,0,0); /* Fallback color */
-      background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-   }
-
-   /* Modal Content/Box */
-   .modal-content {
-      background-color: #fefefe;
-      margin: 15% auto; /* 15% from the top and centered */
-      padding: 20px;
-      border: 1px solid #888;
-      max-width: 250px;
-   }
-
-   #my-select{
-      margin-top: 7px;
-   }
-
-   #select_amount{
-      margin-top: 7px;
-   }
-
-   tr:nth-child(even){
-      background-color: rgb(3, 51, 53)
-   }
-
-   .cellred {
-      padding: 0.7em 0.5em 0.7em 0.5em;
-      text-align: left;
-      color:aliceblue;
-      font-family: 'Trebuchet MS', sans-serif;
-      background-color: #570000;
-   }
-
-
-
-</style>
-
-<div class="content">
-   <h1 style="color: aliceblue; margin-bottom: 30px;">frozen-hero</h1>
-
-   <body class="container" style="text-align:center; background-color:rgb(9, 81, 83);">
       <div class="tab" style="display:inline-block; text-align: center; margin-bottom: 20pt;">
          <button class="tablinks" id="startButton" onclick="openTab(event, 'newLabel')">Neues Label</button>
          <button class="tablinks" id="showListButton" onclick="openTab(event, 'showList')">Liste anzeigen</button>
@@ -201,19 +196,18 @@
                   <option value="one">1</option>
                   <option value="two">2</option>
                   <option value="three">3</option>
-                  <option value="for">4</option>
+                  <option value="four">4</option>
                   <option value="five">5</option>
                </select>
             </div>
          </div>
          <br>
-         <label style="color: aliceblue;" for="date" id="select_amount">Haltbar bis:</label></br>
+         <label style="color: aliceblue;" for="date">Haltbar bis:</label><br>
          <input type="date" style="font-size:15pt; border-radius:14px; padding-left:6px; padding-right:6px; margin:8px; color:rgb(3, 51, 53); width: 170px;" id="date"><br><br>
 
          <button class="printButton" id="printButton" onclick="printButtonClick()">DRUCKEN</button>
 
          <div id="myModal" class="modal">
-
             <!-- Modal content -->
             <div class="modal-content">
                <p>Wird gedruckt... :)
@@ -254,8 +248,7 @@
          function getDatafromDatabase(){
             let xhr_get = new XMLHttpRequest();
             xhr_get.withCredentials = true;
-            let url = "http://hero-pi.hero.home:5000/getData";
-            xhr_get.open("GET", url);
+            xhr_get.open("GET", "/getData");
             xhr_get.setRequestHeader("Content-Type", "application/json");
             xhr_get.send( null );
 
@@ -297,7 +290,7 @@
                var id = entry['id']
                var table_data_cell = document.createElement("TD")
                var table_cell_node = document.createTextNode(id)
-               table_data_cell.className += "cell"
+               table_data_cell.className = "cell"
                table_data_cell.appendChild(table_cell_node)
                table_row.appendChild(table_data_cell);
                //Add name
@@ -311,7 +304,7 @@
                   var table_cell_node = document.createTextNode(firstRow)
                }
 
-               table_data_cell.className += "cell_name"
+               table_data_cell.className = "cell_name"
                table_data_cell.appendChild(table_cell_node);
                table_row.appendChild(table_data_cell);
                //add date
@@ -320,14 +313,9 @@
                let formatted_date = (("0" + datetime.getDate()).slice(-2)) + "." + (("0" + (datetime.getMonth() + 1)).slice(-2)) + "." + datetime.getFullYear()
                var table_data_cell = document.createElement("TD")
                var table_cell_node = document.createTextNode(formatted_date)
-               table_data_cell.className += "cell"
+               table_data_cell.className = date < getDateFormat() ? "cellred" : "cell";
                table_data_cell.appendChild(table_cell_node);
                table_row.appendChild(table_data_cell);
-
-               //add red background
-               if(date < getDateFormat()){
-                  table_data_cell.className += "red";
-               }
 
                //add Swipe-Listener
                table_row.addEventListener('swiped-left', function(e) {
@@ -350,7 +338,7 @@
 
             //Delete from Database
             let xhr_delete = new XMLHttpRequest();
-            let url = "http://hero-pi.hero.home:5000/delEntry";
+            let url = "/delEntry";
             xhr_delete.open("POST", url);
             xhr_delete.setRequestHeader("Content-Type", "application/json");
 
@@ -366,16 +354,8 @@
       </script>
 
       <script>
-         function getDateFormat (date = new Date()){
-            var day = ("0" + date.getDate()).slice(-2);
-            var month = ("0" + (date.getMonth() + 1)).slice(-2);
-            var today = date.getFullYear()+"-"+(month)+"-"+(day);
-            return today;
-         }
-
-
          let xhr_post = new XMLHttpRequest();
-         let url = "http://hero-pi.hero.home:5000/add2freezer";
+         let url = "/add2freezer";
 
 
          //Set date picker to current date + initial start page
@@ -481,6 +461,6 @@
          }
       </script>
 
-   </body>
-</div>
+   </div>
+</body>
 </html>
