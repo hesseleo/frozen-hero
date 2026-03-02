@@ -28,6 +28,17 @@ def _get_connection() -> Generator[sqlite3.Connection, None, None]:
         con.close()
 
 
+def init_db() -> None:
+    """Create the database directory and schema if they do not exist."""
+    config.DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with _get_connection() as con:
+        con.execute(
+            "CREATE TABLE IF NOT EXISTS freezer("
+            "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "row_one TEXT, row_two TEXT, category TEXT, date DATE)"
+        )
+
+
 def get_all_entries() -> list[dict[str, Any]]:
     """Return all freezer entries ordered by date."""
     with _get_connection() as con:

@@ -1,7 +1,7 @@
 """Entry point for frozen-hero.
 
 Run with:
-    python -m frozen_hero [--debug] [--web-debug]
+    python -m frozen_hero [--debug] [--web-debug] [--no-hardware]
 """
 
 import argparse
@@ -10,8 +10,6 @@ import os
 import signal
 import sys
 from threading import Thread
-
-import RPi.GPIO as GPIO
 
 from frozen_hero import config, db
 from frozen_hero.app import create_app
@@ -28,11 +26,14 @@ def _configure_logging(debug: bool) -> None:
     )
 
 
-def _signal_handler(sig: int, frame: object) -> None:
+def _signal_handler(sig: int, frame: object, *, hardware: bool) -> None:
     print("\rfrozen-hero stopped by user. Goodbye!")
     if _scanner is not None:
         _scanner.stop_scan()
-    GPIO.cleanup()
+    if hardware:
+        import RPi.GPIO as GPIO  # noqa: PLC0415
+
+        GPIO.cleanup()
     sys.exit(0)
 
 
@@ -44,6 +45,11 @@ def main() -> None:
     parser.add_argument(
         "--web-debug", action="store_true", help="Start Flask dev server instead of waitress"
     )
+    parser.add_argument(
+        "--no-hardware",
+        action="store_true",
+        help="Skip GPIO / camera initialisation (for desktop development)",
+    )
     args = parser.parse_args()
 
     _configure_logging(args.debug)
@@ -51,24 +57,34 @@ def main() -> None:
     if "SUDO_UID" in os.environ:
         sys.exit("Running this program with root permission is not allowed.")
 
-    GPIO.setwarnings(False)
+    hardware = not args.no_hardware
 
-    signal.signal(signal.SIGINT, _signal_handler)
+    if hardware:
+        import RPi.GPIO as GPIO  # noqa: PLC0415
+
+        GPIO.setwarnings(False)
+
+    signal.signal(
+        signal.SIGINT,
+        lambda sig, frame: _signal_handler(sig, frame, hardware=hardware),
+    )
 
     app = create_app()
 
-    # Lazy import: picamera2 and RPi.GPIO are only available on the Pi.
-    from frozen_hero.scanner import QRCodeScanner
+    if hardware:
+        from frozen_hero.scanner import QRCodeScanner
 
-    def on_qr_detected(entry_id: int) -> None:
-        removed = db.delete_entry(entry_id)
-        if removed:
-            logger.info("QR code detected — deleted entry %d", entry_id)
-        else:
-            logger.warning("QR code detected but entry %d not found", entry_id)
+        def on_qr_detected(entry_id: int) -> None:
+            removed = db.delete_entry(entry_id)
+            if removed:
+                logger.info("QR code detected — deleted entry %d", entry_id)
+            else:
+                logger.warning("QR code detected but entry %d not found", entry_id)
 
-    _scanner = QRCodeScanner(callback=on_qr_detected)
-    logger.info("QR code scanner ready")
+        _scanner = QRCodeScanner(callback=on_qr_detected)
+        logger.info("QR code scanner ready")
+    else:
+        logger.info("Hardware disabled — scanner not started")
 
     if args.web_debug:
         logger.info("Starting Flask development server")

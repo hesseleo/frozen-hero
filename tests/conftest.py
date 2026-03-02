@@ -5,7 +5,6 @@ injected into sys.modules *before* any frozen_hero module is imported,
 so this file does that at module level — pytest loads conftest.py first.
 """
 
-import sqlite3
 import sys
 from unittest.mock import MagicMock
 
@@ -32,26 +31,15 @@ sys.modules.setdefault("pyzbar.pyzbar", _pyzbar_stub)
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
-from frozen_hero import config  # noqa: E402 — must come after sys.modules setup
-
-
-def _create_schema(path):
-    con = sqlite3.connect(path)
-    con.execute(
-        "CREATE TABLE freezer("
-        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-        "row_one TEXT, row_two TEXT, category TEXT, date DATE)"
-    )
-    con.commit()
-    con.close()
+from frozen_hero import config, db  # noqa: E402 — must come after sys.modules setup
 
 
 @pytest.fixture()
 def tmp_db(tmp_path, monkeypatch):
     """Isolated SQLite database for each test."""
     db_file = tmp_path / "test.db"
-    _create_schema(db_file)
     monkeypatch.setattr(config, "DB_PATH", db_file)
+    db.init_db()
     return db_file
 
 

@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 
 def create_app() -> Flask:
     """Create and configure the Flask application."""
+    db.init_db()
+
     app = Flask(
         __name__,
         template_folder=str(config.TEMPLATES_DIR),
