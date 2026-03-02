@@ -39,8 +39,8 @@ sudo apt install ./utils/ql600pdrv-3.1.5-0.armhf.deb
 picamera2 is only available as a system package, so the venv must include system site-packages:
 
 ```bash
-python -m venv venv --system-site-packages
-source venv/bin/activate
+python -m venv .venv --system-site-packages
+source .venv/bin/activate
 pip install -e .
 ```
 
