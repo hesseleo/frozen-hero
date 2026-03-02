@@ -58,7 +58,7 @@ def print_label(row_one: str, row_two: str, date_str: str, entry_id: int) -> Non
 def _make_label_name(row_one: str, date: datetime) -> str:
     """Produce a filesystem-safe label name from the first row and date."""
     name = row_one
-    for src, dst in {"ö": "oe", "ä": "ae", "ü": "ue"}.items():
+    for src, dst in {"ö": "oe", "ä": "ae", "ü": "ue", "Ö": "Oe", "Ä": "Ae", "Ü": "Ue"}.items():
         name = name.replace(src, dst)
     for ch in ("'", '"', " "):
         name = name.replace(ch, "")
