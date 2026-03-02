@@ -1,18 +1,20 @@
 #!/bin/bash
 
-# Copyright (c) 2022 HeRo Developers
-# Author: Leonhard Hesse
-# Created: January 2023
+# Script to backup frozen-hero database to a network share.
+# The backup file is overwritten on each run.
 
-# Script to backup frozen-hero database to NAS
+# Adjust these variables to match your environment
+SHARE_PATH=//hero-nas.hero.home/Backup
+MOUNT_PATH=/mnt/HeRoQnap/Backup
+PROJECT_ROOT=/home/hero/frozen-hero
+CREDENTIALS_FILE=/home/hero/.nas-credentials
 
-MOUNT_POINT=/mnt/HeRoQnap/Backup
-DB_SRC=/home/hero/frozen-hero/database/frozen-hero.db
-DB_DST=$MOUNT_POINT/HeRoPi/frozen-hero-database/frozen-hero.db
+DB_SRC=$PROJECT_ROOT/database/frozen-hero.db
+DB_DST=$MOUNT_PATH/frozen-hero/frozen-hero.db
 
-if ! mountpoint -q $MOUNT_POINT; then
-    if ! mount.cifs //hero-nas.hero.home/Backup $MOUNT_POINT \
-        -o uid=1000,gid=1000,file_mode=0640,dir_mode=0750,credentials=/home/hero/.nas-credentials; then
+if ! mountpoint -q $MOUNT_PATH; then
+    if ! mount.cifs $SHARE_PATH $MOUNT_PATH \
+        -o uid=1000,gid=1000,file_mode=0640,dir_mode=0750,credentials=$CREDENTIALS_FILE; then
         echo "Failed to mount NAS"
         exit 1
     fi
