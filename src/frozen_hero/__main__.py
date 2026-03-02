@@ -57,18 +57,6 @@ def main() -> None:
 
     app = create_app()
 
-    if args.web_debug:
-        logger.info("Starting Flask development server")
-        app.run(debug=True, host=config.SERVER_HOST, port=config.SERVER_PORT)
-    else:
-        from waitress import serve
-
-        logger.info("Starting waitress on %s:%d", config.SERVER_HOST, config.SERVER_PORT)
-        Thread(
-            target=lambda: serve(app, host=config.SERVER_HOST, port=config.SERVER_PORT),
-            daemon=True,
-        ).start()
-
     # Lazy import: picamera2 and RPi.GPIO are only available on the Pi.
     from frozen_hero.scanner import QRCodeScanner
 
@@ -82,7 +70,19 @@ def main() -> None:
     _scanner = QRCodeScanner(callback=on_qr_detected)
     logger.info("QR code scanner ready")
 
-    signal.pause()
+    if args.web_debug:
+        logger.info("Starting Flask development server")
+        app.run(debug=True, use_reloader=False, host=config.SERVER_HOST, port=config.SERVER_PORT)
+    else:
+        from waitress import serve
+
+        logger.info("Starting waitress on %s:%d", config.SERVER_HOST, config.SERVER_PORT)
+        Thread(
+            target=lambda: serve(app, host=config.SERVER_HOST, port=config.SERVER_PORT),
+            daemon=True,
+        ).start()
+
+        signal.pause()
 
 
 if __name__ == "__main__":
