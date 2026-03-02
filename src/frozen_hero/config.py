@@ -14,9 +14,6 @@ TEMPLATES_DIR: Path = PROJECT_ROOT / "templates"
 STATIC_DIR: Path = PROJECT_ROOT / "images"
 
 TMP_DIR: Path = PROJECT_ROOT / "tmp"
-TMP_TXT_DIR: Path = TMP_DIR / "TxtImg"
-TMP_QR_DIR: Path = TMP_DIR / "QRcode"
-TMP_LABEL_DIR: Path = TMP_DIR / "Label"
 
 # ---------------------------------------------------------------------------
 # Server

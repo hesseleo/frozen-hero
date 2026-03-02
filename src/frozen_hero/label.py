@@ -38,9 +38,10 @@ def print_label(row_one: str, row_two: str, date_str: str, entry_id: int) -> Non
     best_before = datetime.strptime(date_str, "%Y-%m-%d")
     label_name = _make_label_name(row_one, best_before)
 
-    txt_path = config.TMP_TXT_DIR / f"{label_name}_text.png"
-    qr_path = config.TMP_QR_DIR / f"{label_name}_qr.png"
-    label_path = config.TMP_LABEL_DIR / f"{label_name}_label.jpg"
+    config.TMP_DIR.mkdir(parents=True, exist_ok=True)
+    txt_path = config.TMP_DIR / f"{label_name}_text.png"
+    qr_path = config.TMP_DIR / f"{label_name}_qr.png"
+    label_path = config.TMP_DIR / f"{label_name}_label.jpg"
 
     try:
         _render_text_image(row_one, row_two, best_before, txt_path)

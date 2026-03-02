@@ -65,9 +65,7 @@ class TestCheckForLinebreak:
 
 class TestPrintLabel:
     def test_calls_convert_qrencode_and_brother_ql(self, tmp_path, monkeypatch):
-        monkeypatch.setattr(config, "TMP_TXT_DIR", tmp_path)
-        monkeypatch.setattr(config, "TMP_QR_DIR", tmp_path)
-        monkeypatch.setattr(config, "TMP_LABEL_DIR", tmp_path)
+        monkeypatch.setattr(config, "TMP_DIR", tmp_path)
 
         with patch("frozen_hero.label.subprocess.run") as mock_run:
             print_label("Soup", "vegan", "2025-01-01", 42)
@@ -78,9 +76,7 @@ class TestPrintLabel:
         assert commands.count("brother_ql") == 1
 
     def test_entry_id_passed_to_qrencode(self, tmp_path, monkeypatch):
-        monkeypatch.setattr(config, "TMP_TXT_DIR", tmp_path)
-        monkeypatch.setattr(config, "TMP_QR_DIR", tmp_path)
-        monkeypatch.setattr(config, "TMP_LABEL_DIR", tmp_path)
+        monkeypatch.setattr(config, "TMP_DIR", tmp_path)
 
         with patch("frozen_hero.label.subprocess.run") as mock_run:
             print_label("X", "", "2025-01-01", 99)
@@ -91,9 +87,7 @@ class TestPrintLabel:
         assert "99" in qrencode_call[0][0]
 
     def test_cleanup_runs_even_if_subprocess_fails(self, tmp_path, monkeypatch):
-        monkeypatch.setattr(config, "TMP_TXT_DIR", tmp_path)
-        monkeypatch.setattr(config, "TMP_QR_DIR", tmp_path)
-        monkeypatch.setattr(config, "TMP_LABEL_DIR", tmp_path)
+        monkeypatch.setattr(config, "TMP_DIR", tmp_path)
 
         # Create a dummy file so cleanup has something to delete
         dummy = tmp_path / "Soup_20250101_text.png"
