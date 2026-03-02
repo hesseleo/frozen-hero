@@ -31,7 +31,12 @@ class TestAdd2Freezer:
     def test_success_returns_201_with_entry(self, client):
         resp = client.post(
             "/add2freezer",
-            json={"row1": "Lasagne", "row2": "vegan", "category": "selfstuff", "date": "2025-03-01"},
+            json={
+                "row1": "Lasagne",
+                "row2": "vegan",
+                "category": "selfstuff",
+                "date": "2025-03-01",
+            },
         )
         assert resp.status_code == 201
         result = resp.get_json()["result"]

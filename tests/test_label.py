@@ -1,7 +1,7 @@
 """Tests for label generation helpers."""
 
 from datetime import datetime
-from unittest.mock import call, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -71,7 +71,7 @@ class TestPrintLabel:
             print_label("Soup", "vegan", "2025-01-01", 42)
 
         commands = [c[0][0][0] for c in mock_run.call_args_list]
-        assert commands.count("convert") == 3   # render text + compose + border
+        assert commands.count("convert") == 3  # render text + compose + border
         assert commands.count("qrencode") == 1
         assert commands.count("brother_ql") == 1
 
@@ -81,9 +81,7 @@ class TestPrintLabel:
         with patch("frozen_hero.label.subprocess.run") as mock_run:
             print_label("X", "", "2025-01-01", 99)
 
-        qrencode_call = next(
-            c for c in mock_run.call_args_list if c[0][0][0] == "qrencode"
-        )
+        qrencode_call = next(c for c in mock_run.call_args_list if c[0][0][0] == "qrencode")
         assert "99" in qrencode_call[0][0]
 
     def test_cleanup_runs_even_if_subprocess_fails(self, tmp_path, monkeypatch):
@@ -93,9 +91,11 @@ class TestPrintLabel:
         dummy = tmp_path / "Soup_20250101_text.png"
         dummy.write_bytes(b"")
 
-        with patch("frozen_hero.label.subprocess.run", side_effect=OSError("fail")):
-            with pytest.raises(OSError):
-                print_label("Soup", "", "2025-01-01", 1)
+        with (
+            patch("frozen_hero.label.subprocess.run", side_effect=OSError("fail")),
+            pytest.raises(OSError),
+        ):
+            print_label("Soup", "", "2025-01-01", 1)
 
         # The finally block should have tried to unlink temp files
         assert not dummy.exists()
