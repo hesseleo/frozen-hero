@@ -57,7 +57,9 @@ class TestInit:
     def test_gpio_pins_configured(self, lgpio_mock):
         QRCodeScanner(callback=MagicMock())
         lgpio_mock.gpiochip_open.assert_called_with(0)
-        lgpio_mock.gpio_claim_alert.assert_called_with(ANY, config.PIN_MOTION_DETECTOR, lgpio_mock.RISING_EDGE)
+        lgpio_mock.gpio_claim_alert.assert_called_with(
+            ANY, config.PIN_MOTION_DETECTOR, lgpio_mock.RISING_EDGE
+        )
         lgpio_mock.gpio_set_debounce_micros.assert_called_with(
             ANY, config.PIN_MOTION_DETECTOR, config.PIN_MOTION_DEBOUNCE_US
         )
