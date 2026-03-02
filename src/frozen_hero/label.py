@@ -59,8 +59,7 @@ def print_label(row_one: str, row_two: str, date_str: str, entry_id: int) -> Non
 def _make_label_name(row_one: str, date: datetime) -> str:
     """Produce a filesystem-safe label name from the first row and date."""
     name = unicodedata.normalize("NFD", row_one).encode("ascii", "ignore").decode("ascii")
-    for ch in ("'", '"', " "):
-        name = name.replace(ch, "")
+    name = "".join(c for c in name if c.isalnum())
     return name + "_" + date.strftime("%Y%m%d")
 
 
