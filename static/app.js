@@ -22,7 +22,6 @@ const TRANSLATIONS = {
       cat_butter:     "Butter",
       cat_cake:       "Kuchen",
       cat_fish:       "Fisch",
-      delete_confirm:  "Soll {name} gelöscht werden?",
       delete_title:    "Eintrag löschen",
       delete:          "Löschen",
       cancel:          "Abbrechen",
@@ -60,7 +59,6 @@ const TRANSLATIONS = {
       tip_category:    "Optional. Automatically sets the best-before date based on typical shelf life per category. The date can be adjusted manually afterwards.",
       tip_amount:      "Required. How many labels to print in one go.",
       tip_date:        "Required. Printed on the label and shown in the inventory. Automatically set when a category is selected.",
-      delete_confirm:  "Delete {name}?",
       delete_title:    "Delete entry",
       delete:          "Delete",
       cancel:          "Cancel",
@@ -247,8 +245,8 @@ function hideToast() {
 }
 
 function printButtonClick() {
-   const row1   = document.getElementById('dec1').value.trim();
-   const row2   = document.getElementById('dec2').value.trim();
+   const row1   = document.getElementById('row1').value.trim();
+   const row2   = document.getElementById('row2').value.trim();
    const date   = document.getElementById('date').value;
    const amount = document.getElementById('select_amount').selectedIndex + 1;
 
@@ -268,8 +266,8 @@ function printButtonClick() {
          sent++;
          if (sent < amount) { sendOne(); return; }
          hideToast();
-         document.getElementById('dec1').value = '';
-         document.getElementById('dec2').value = '';
+         document.getElementById('row1').value = '';
+         document.getElementById('row2').value = '';
          document.getElementById('date').value = getDateFormat();
          document.getElementById('my-select').value = '';
          document.getElementById('select_amount').selectedIndex = 0;
