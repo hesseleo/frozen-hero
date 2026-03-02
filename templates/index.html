@@ -163,22 +163,33 @@
          line-height: 1;
          transition: opacity 0.2s;
       }
+
+      .header-bar {
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         flex-wrap: wrap;
+         gap: 8px;
+         margin-bottom: 20pt;
+      }
    </style>
 </head>
 
 <body class="container" style="text-align:center; background-color:rgb(9, 81, 83);">
    <div class="content">
-      <div style="display:flex; justify-content:center; align-items:center; margin-bottom:30px; position:relative;">
-         <h1 style="color: aliceblue; margin:0;">frozen-hero</h1>
-         <div id="lang-switcher" style="position:absolute; right:0;">
+      <div style="text-align:center; margin-bottom: 18px;">
+         <img src="/static/AppLogo_v-1-0.png" alt="HeRo Frozen" style="max-width: 220px; width: 55%;">
+      </div>
+
+      <div class="header-bar">
+         <div class="tab" style="display:inline-block;">
+            <button class="tablinks" id="startButton" onclick="openTab(event, 'newLabel')" data-i18n="tab_new_label">Neues Label</button>
+            <button class="tablinks" id="showListButton" onclick="openTab(event, 'showList')" data-i18n="tab_show_list">Liste anzeigen</button>
+         </div>
+         <div id="lang-switcher">
             <span data-lang="de" onclick="setLanguage('de')" title="Deutsch">🇩🇪</span>
             <span data-lang="en" onclick="setLanguage('en')" title="English">🇬🇧</span>
          </div>
-      </div>
-
-      <div class="tab" style="display:inline-block; text-align: center; margin-bottom: 20pt;">
-         <button class="tablinks" id="startButton" onclick="openTab(event, 'newLabel')" data-i18n="tab_new_label">Neues Label</button>
-         <button class="tablinks" id="showListButton" onclick="openTab(event, 'showList')" data-i18n="tab_show_list">Liste anzeigen</button>
       </div>
       <div id="newLabel" class="tabcontent">
          <label style="color: aliceblue;" for="dec1" data-i18n="label_row1">Erste Zeile:</label><br>
