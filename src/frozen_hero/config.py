@@ -11,7 +11,7 @@ PROJECT_ROOT: Path = Path(__file__).resolve().parents[2]
 DB_PATH: Path = PROJECT_ROOT / "database" / "frozen-hero.db"
 
 TEMPLATES_DIR: Path = PROJECT_ROOT / "templates"
-STATIC_DIR: Path = PROJECT_ROOT / "images"
+STATIC_DIR: Path = PROJECT_ROOT / "static"
 
 TMP_DIR: Path = PROJECT_ROOT / "tmp"
 
