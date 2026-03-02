@@ -58,6 +58,9 @@ ignore = [
     "S607",  # partial path for executables — expected for system tools like `convert`
 ]
 
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]  # assert is idiomatic in pytest
+
 # ---------------------------------------------------------------------------
 # Mypy
 # ---------------------------------------------------------------------------
