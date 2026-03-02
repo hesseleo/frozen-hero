@@ -5,7 +5,7 @@ from collections.abc import Callable
 from threading import Lock, Thread, Timer
 from time import sleep
 
-import RPi.GPIO as GPIO
+import lgpio
 from picamera2 import Picamera2  # type: ignore
 from pyzbar.pyzbar import decode
 
@@ -31,16 +31,13 @@ class QRCodeScanner:
         self._scan_thread: Thread | None = None
         self._timeout_timer: Timer | None = None
 
-        GPIO.setmode(GPIO.BCM)
-
-        GPIO.setup(config.PIN_MOTION_DETECTOR, GPIO.IN)
-        GPIO.add_event_detect(config.PIN_MOTION_DETECTOR, GPIO.RISING, callback=self._on_motion)
-
-        GPIO.setup(config.PIN_BUZZER, GPIO.OUT)
-        GPIO.output(config.PIN_BUZZER, GPIO.LOW)
-
-        GPIO.setup(config.PIN_LED, GPIO.OUT)
-        GPIO.output(config.PIN_LED, GPIO.LOW)
+        self._chip = lgpio.gpiochip_open(0)
+        lgpio.gpio_claim_input(self._chip, config.PIN_MOTION_DETECTOR)
+        self._motion_cb = lgpio.callback(
+            self._chip, config.PIN_MOTION_DETECTOR, lgpio.RISING_EDGE, self._on_motion
+        )
+        lgpio.gpio_claim_output(self._chip, config.PIN_BUZZER, 0)
+        lgpio.gpio_claim_output(self._chip, config.PIN_LED, 0)
 
     # ------------------------------------------------------------------
     # Public methods
@@ -69,11 +66,16 @@ class QRCodeScanner:
                 logger.debug("Stopping scan")
                 self._active = False
 
+    def cleanup(self) -> None:
+        """Release GPIO resources."""
+        self._motion_cb.cancel()
+        lgpio.gpiochip_close(self._chip)
+
     # ------------------------------------------------------------------
     # Private methods
     # ------------------------------------------------------------------
 
-    def _on_motion(self, _channel: int) -> None:
+    def _on_motion(self, _chip: int, _gpio: int, _level: int, _tick: int) -> None:
         logger.debug("Motion detected")
         self.start_scan()
 
@@ -117,9 +119,9 @@ class QRCodeScanner:
 
     def _beep(self, seconds: float) -> None:
         """Beep the buzzer synchronously (already running in the scan thread)."""
-        GPIO.output(config.PIN_BUZZER, GPIO.HIGH)
+        lgpio.gpio_write(self._chip, config.PIN_BUZZER, 1)
         sleep(seconds)
-        GPIO.output(config.PIN_BUZZER, GPIO.LOW)
+        lgpio.gpio_write(self._chip, config.PIN_BUZZER, 0)
 
     def _set_led(self, enable: bool) -> None:
-        GPIO.output(config.PIN_LED, GPIO.HIGH if enable else GPIO.LOW)
+        lgpio.gpio_write(self._chip, config.PIN_LED, 1 if enable else 0)

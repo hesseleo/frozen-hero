@@ -17,7 +17,6 @@ from frozen_hero.app import create_app
 logger = logging.getLogger(__name__)
 
 # Set in main() when hardware is enabled; used by _signal_handler.
-_gpio = None
 _scanner = None
 
 
@@ -32,13 +31,12 @@ def _signal_handler(sig: int, frame: object) -> None:
     print("\rfrozen-hero stopped by user. Goodbye!")
     if _scanner is not None:
         _scanner.stop_scan()
-    if _gpio is not None:
-        _gpio.cleanup()
+        _scanner.cleanup()
     sys.exit(0)
 
 
 def main() -> None:
-    global _gpio, _scanner  # noqa: PLW0603
+    global _scanner  # noqa: PLW0603
 
     parser = argparse.ArgumentParser(description="frozen-hero freezer management system")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
@@ -56,12 +54,6 @@ def main() -> None:
 
     if "SUDO_UID" in os.environ:
         sys.exit("Running this program with root permission is not allowed.")
-
-    if not args.no_hardware:
-        import RPi.GPIO as GPIO  # noqa: PLC0415
-
-        _gpio = GPIO
-        _gpio.setwarnings(False)
 
     signal.signal(signal.SIGINT, _signal_handler)
 

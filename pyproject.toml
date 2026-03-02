@@ -12,7 +12,7 @@ dependencies = [
     # and made available through --system-site-packages in the venv.
     "flask>=3.0",
     "waitress>=3.0",
-    "RPi.GPIO",
+    "lgpio",
     "pyzbar",
     "brother-ql",
     "pillow",
@@ -70,7 +70,7 @@ files = ["src"]
 
 [[tool.mypy.overrides]]
 module = [
-    "RPi.*",
+    "lgpio",
     "picamera2.*",
     "pyzbar.*",
     "brother_ql.*",

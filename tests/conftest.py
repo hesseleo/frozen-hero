@@ -1,6 +1,6 @@
 """Shared fixtures and hardware stubs for frozen-hero tests.
 
-RPi.GPIO, picamera2, and pyzbar are Pi-only packages.  They must be
+lgpio, picamera2, and pyzbar are Pi-only packages.  They must be
 injected into sys.modules *before* any frozen_hero module is imported,
 so this file does that at module level — pytest loads conftest.py first.
 """
@@ -13,14 +13,10 @@ import pytest
 # ---------------------------------------------------------------------------
 # Stub Pi-only packages
 # ---------------------------------------------------------------------------
-# `import RPi.GPIO as GPIO` in scanner.py calls __import__("RPi.GPIO") which
-# returns the top-level "RPi" package, then does `GPIO = RPi_mod.GPIO`.
-# So we need RPi_mock.GPIO to be the same object as sys.modules["RPi.GPIO"].
-_gpio_mock = MagicMock(name="RPi.GPIO")
-_rpi_mock = MagicMock(name="RPi")
-_rpi_mock.GPIO = _gpio_mock
-sys.modules.setdefault("RPi", _rpi_mock)
-sys.modules.setdefault("RPi.GPIO", _gpio_mock)
+_lgpio_mock = MagicMock(name="lgpio")
+_lgpio_mock.gpiochip_open.return_value = 0
+_lgpio_mock.callback.return_value = MagicMock()
+sys.modules.setdefault("lgpio", _lgpio_mock)
 
 sys.modules.setdefault("picamera2", MagicMock())
 

@@ -28,14 +28,16 @@ def _make_barcode(data: str, barcode_type: str = "QRCODE") -> MagicMock:
 
 
 @pytest.fixture()
-def gpio():
-    mock = sys.modules["RPi.GPIO"]
+def lgpio_mock():
+    mock = sys.modules["lgpio"]
     mock.reset_mock()
+    mock.gpiochip_open.return_value = 0
+    mock.callback.return_value = MagicMock()
     return mock
 
 
 @pytest.fixture()
-def scanner(gpio):
+def scanner(lgpio_mock):
     return QRCodeScanner(callback=MagicMock())
 
 
@@ -45,19 +47,18 @@ def scanner(gpio):
 
 
 class TestInit:
-    def test_gpio_pins_configured(self, gpio):
+    def test_gpio_pins_configured(self, lgpio_mock):
         QRCodeScanner(callback=MagicMock())
-        gpio.setmode.assert_called_once()
-        # setup called for motion, buzzer and LED pins
-        setup_pins = {c[0][0] for c in gpio.setup.call_args_list}
-        assert config.PIN_MOTION_DETECTOR in setup_pins
-        assert config.PIN_BUZZER in setup_pins
-        assert config.PIN_LED in setup_pins
+        lgpio_mock.gpiochip_open.assert_called_with(0)
+        lgpio_mock.gpio_claim_input.assert_called_with(ANY, config.PIN_MOTION_DETECTOR)
+        output_pins = {c[0][1] for c in lgpio_mock.gpio_claim_output.call_args_list}
+        assert config.PIN_BUZZER in output_pins
+        assert config.PIN_LED in output_pins
 
-    def test_motion_interrupt_registered(self, gpio):
+    def test_motion_interrupt_registered(self, lgpio_mock):
         QRCodeScanner(callback=MagicMock())
-        gpio.add_event_detect.assert_called_once_with(
-            config.PIN_MOTION_DETECTOR, gpio.RISING, callback=ANY
+        lgpio_mock.callback.assert_called_with(
+            ANY, config.PIN_MOTION_DETECTOR, lgpio_mock.RISING_EDGE, ANY
         )
 
 
@@ -101,7 +102,7 @@ class TestStartStop:
         MockCam.return_value.stop.assert_called_once()
         MockCam.return_value.close.assert_called_once()
 
-    def test_led_turned_off_after_stop(self, scanner, gpio):
+    def test_led_turned_off_after_stop(self, scanner, lgpio_mock):
         with (
             patch("frozen_hero.scanner.Picamera2"),
             patch("frozen_hero.scanner.decode", return_value=[]),
@@ -111,7 +112,7 @@ class TestStartStop:
             scanner.stop_scan()
             scanner._scan_thread.join(timeout=2)
 
-        gpio.output.assert_any_call(config.PIN_LED, gpio.LOW)
+        lgpio_mock.gpio_write.assert_any_call(ANY, config.PIN_LED, 0)
 
 
 class TestQRDetection:
@@ -191,7 +192,7 @@ class TestErrorHandling:
         MockCam.return_value.close.assert_called_once()
 
     @pytest.mark.filterwarnings("ignore::pytest.PytestUnhandledThreadExceptionWarning")
-    def test_led_turned_off_when_decode_raises(self, scanner, gpio):
+    def test_led_turned_off_when_decode_raises(self, scanner, lgpio_mock):
         with (
             patch("frozen_hero.scanner.Picamera2"),
             patch("frozen_hero.scanner.decode", side_effect=RuntimeError("err")),
@@ -199,11 +200,11 @@ class TestErrorHandling:
             scanner.start_scan()
             scanner._scan_thread.join(timeout=2)
 
-        gpio.output.assert_any_call(config.PIN_LED, gpio.LOW)
+        lgpio_mock.gpio_write.assert_any_call(ANY, config.PIN_LED, 0)
 
 
 class TestMotion:
     def test_motion_callback_calls_start_scan(self, scanner):
         with patch.object(scanner, "start_scan") as mock_start:
-            scanner._on_motion(config.PIN_MOTION_DETECTOR)
+            scanner._on_motion(0, config.PIN_MOTION_DETECTOR, 1, 0)
         mock_start.assert_called_once()
