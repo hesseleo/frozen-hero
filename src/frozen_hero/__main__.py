@@ -16,6 +16,8 @@ from frozen_hero.app import create_app
 
 logger = logging.getLogger(__name__)
 
+# Set in main() when hardware is enabled; used by _signal_handler.
+_GPIO = None
 _scanner = None
 
 
@@ -26,19 +28,17 @@ def _configure_logging(debug: bool) -> None:
     )
 
 
-def _signal_handler(sig: int, frame: object, *, hardware: bool) -> None:
+def _signal_handler(sig: int, frame: object) -> None:
     print("\rfrozen-hero stopped by user. Goodbye!")
     if _scanner is not None:
         _scanner.stop_scan()
-    if hardware:
-        import RPi.GPIO as GPIO  # noqa: PLC0415
-
-        GPIO.cleanup()
+    if _GPIO is not None:
+        _GPIO.cleanup()
     sys.exit(0)
 
 
 def main() -> None:
-    global _scanner  # noqa: PLW0603
+    global _GPIO, _scanner  # noqa: PLW0603
 
     parser = argparse.ArgumentParser(description="frozen-hero freezer management system")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
@@ -57,21 +57,17 @@ def main() -> None:
     if "SUDO_UID" in os.environ:
         sys.exit("Running this program with root permission is not allowed.")
 
-    hardware = not args.no_hardware
-
-    if hardware:
+    if not args.no_hardware:
         import RPi.GPIO as GPIO  # noqa: PLC0415
 
-        GPIO.setwarnings(False)
+        _GPIO = GPIO
+        _GPIO.setwarnings(False)
 
-    signal.signal(
-        signal.SIGINT,
-        lambda sig, frame: _signal_handler(sig, frame, hardware=hardware),
-    )
+    signal.signal(signal.SIGINT, _signal_handler)
 
     app = create_app()
 
-    if hardware:
+    if not args.no_hardware:
         from frozen_hero.scanner import QRCodeScanner
 
         def on_qr_detected(entry_id: int) -> None:
