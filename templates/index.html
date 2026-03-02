@@ -170,13 +170,33 @@
          text-overflow: ellipsis;
       }
 
-      .item-sub {
-         font-size: 10pt;
-         color: var(--gray);
-         margin-top: 2px;
-         white-space: nowrap;
+      .item-tag {
+         display: inline-block;
+         font-size: 9pt;
+         background: rgba(115, 170, 172, 0.18);
+         color: var(--teal-light);
+         border-radius: 6px;
+         padding: 2px 8px;
+         margin-top: 5px;
+         max-width: 100%;
          overflow: hidden;
          text-overflow: ellipsis;
+         white-space: nowrap;
+      }
+
+      .sheet-tag {
+         display: inline-block;
+         font-size: 10pt;
+         background: rgba(115, 170, 172, 0.18);
+         color: var(--teal-light);
+         border-radius: 6px;
+         padding: 3px 10px;
+         margin-top: 6px;
+      }
+
+      .list-item.expired .item-tag {
+         background: rgba(255, 170, 170, 0.15);
+         color: #ffaaaa;
       }
 
       .item-date {
@@ -595,8 +615,9 @@
             const expired = entry.date < today;
             const item    = document.createElement('div');
             item.className = 'list-item' + (expired ? ' expired' : '');
-            item.dataset.id   = entry.id;
-            item.dataset.name = entry.row_one + (entry.row_two ? ' | ' + entry.row_two : '');
+            item.dataset.id     = entry.id;
+            item.dataset.rowOne = entry.row_one;
+            item.dataset.rowTwo = entry.row_two || '';
 
             const info = document.createElement('div');
             info.className = 'item-info';
@@ -607,10 +628,10 @@
             info.appendChild(nameEl);
 
             if (entry.row_two) {
-               const subEl = document.createElement('div');
-               subEl.className = 'item-sub';
-               subEl.textContent = entry.row_two;
-               info.appendChild(subEl);
+               const tagEl = document.createElement('div');
+               tagEl.className = 'item-tag';
+               tagEl.textContent = entry.row_two;
+               info.appendChild(tagEl);
             }
 
             const dateEl = document.createElement('div');
@@ -636,7 +657,15 @@
 
       function openSheet(item) {
          document.getElementById('sheet-title').textContent = t('delete_title');
-         document.getElementById('sheet-subtitle').textContent = t('delete_confirm', { name: item.dataset.name });
+         const sub = document.getElementById('sheet-subtitle');
+         sub.innerHTML = '';
+         sub.appendChild(document.createTextNode(item.dataset.rowOne));
+         if (item.dataset.rowTwo) {
+            const tag = document.createElement('div');
+            tag.className = 'sheet-tag';
+            tag.textContent = item.dataset.rowTwo;
+            sub.appendChild(tag);
+         }
          document.getElementById('sheet-confirm').onclick = () => {
             closeSheet();
             const xhr = new XMLHttpRequest();
