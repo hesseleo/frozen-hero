@@ -43,7 +43,6 @@
       .header-logo {
          height: 38px;
          width: auto;
-         background: white;
          border-radius: 6px;
          padding: 2px 6px;
          flex-shrink: 0;
@@ -51,7 +50,7 @@
 
       .header-title {
          flex: 1;
-         font-size: 1.2em;
+         font-size: 1.6em;
          font-weight: 600;
          color: var(--text);
       }
@@ -110,6 +109,7 @@
          padding: 10px 14px;
          outline: none;
          -webkit-appearance: none;
+         appearance: none;
          color-scheme: dark;
       }
 
@@ -558,6 +558,9 @@
          document.querySelectorAll('[data-i18n-static]').forEach(el => {
             el.textContent = t(el.dataset.i18nStatic);
          });
+         document.querySelectorAll('[data-iso-date]').forEach(el => {
+            el.textContent = formatDisplayDate(el.dataset.isoDate);
+         });
          document.getElementById('lang-select').value = lang;
       }
 
@@ -582,7 +585,9 @@
 
       function formatDisplayDate(iso) {
          const [y, m, d] = iso.split('-');
-         return `${d}.${m}.${y}`;
+         const date = new Date(+y, +m - 1, +d);
+         const locale = currentLang === 'de' ? 'de-DE' : 'en-GB';
+         return new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
       }
 
       // ── Data ───────────────────────────────────────────────────────────
@@ -636,6 +641,7 @@
 
             const dateEl = document.createElement('div');
             dateEl.className = 'item-date';
+            dateEl.dataset.isoDate = entry.date;
             dateEl.textContent = formatDisplayDate(entry.date);
 
             const delBtn = document.createElement('button');
@@ -659,7 +665,8 @@
          document.getElementById('sheet-title').textContent = t('delete_title');
          const sub = document.getElementById('sheet-subtitle');
          sub.innerHTML = '';
-         sub.appendChild(document.createTextNode(item.dataset.rowOne));
+         const nameNode = document.createTextNode(item.dataset.rowOne);
+         sub.appendChild(nameNode);
          if (item.dataset.rowTwo) {
             const tag = document.createElement('div');
             tag.className = 'sheet-tag';
