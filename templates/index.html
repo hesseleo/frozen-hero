@@ -118,6 +118,25 @@
          box-shadow: 0 0 0 2px var(--teal-light);
       }
 
+      .select-wrap {
+         position: relative;
+      }
+
+      .select-wrap::after {
+         content: "▾";
+         position: absolute;
+         right: 14px;
+         top: 50%;
+         transform: translateY(-50%);
+         color: var(--teal-light);
+         font-size: 14pt;
+         pointer-events: none;
+      }
+
+      .select-wrap select {
+         padding-right: 36px;
+      }
+
       .field-row {
          display: flex;
          gap: 12px;
@@ -406,8 +425,9 @@
          <div class="card">
             <div class="field">
                <label data-i18n="label_category">Kategorie</label>
+               <div class="select-wrap">
                <select id="my-select">
-                  <option value="" disabled selected></option>
+                  <option value="" disabled selected data-i18n="cat_placeholder">Bitte wählen …</option>
                   <option value="selfstuff" data-i18n="cat_selfstuff">Selbstgekochtes</option>
                   <option value="vegetable" data-i18n="cat_vegetable">Gemüse</option>
                   <option value="herbs"     data-i18n="cat_herbs">Kräuter</option>
@@ -420,6 +440,7 @@
                   <option value="cake"      data-i18n="cat_cake">Kuchen</option>
                   <option value="fish"      data-i18n="cat_fish">Fisch</option>
                </select>
+               </div>
             </div>
             <div class="field-row">
                <div class="field">
@@ -495,6 +516,7 @@
             label_date:     "Haltbar bis",
             btn_print:      "DRUCKEN",
             modal_printing: "Wird gedruckt… :)",
+            cat_placeholder: "Bitte wählen …",
             cat_selfstuff:  "Selbstgekochtes",
             cat_vegetable:  "Gemüse",
             cat_herbs:      "Kräuter",
@@ -522,6 +544,7 @@
             label_date:     "Best before",
             btn_print:      "PRINT",
             modal_printing: "Printing… :)",
+            cat_placeholder: "Please select …",
             cat_selfstuff:  "Home-cooked",
             cat_vegetable:  "Vegetables",
             cat_herbs:      "Herbs",
