@@ -88,34 +88,34 @@ class QRCodeScanner:
         self._timeout_timer.start()
         self._set_led(True)
 
-        while self._active:
-            if self._camera is None:
-                raise RuntimeError("Camera not initialized")
+        try:
+            while self._active:
+                if self._camera is None:
+                    raise RuntimeError("Camera not initialized")
 
-            frame = self._camera.capture_array()
-            barcodes = decode(frame)
-            for barcode in barcodes:
-                raw = bytes(barcode.data).decode("utf-8")
-                logger.debug("Found barcode: %s (%s)", raw, barcode.type)
-                if barcode.type == "QRCODE":
-                    if self._timeout_timer is not None:
-                        self._timeout_timer.cancel()
-                    try:
-                        entry_id = int(raw)
-                    except ValueError:
-                        logger.warning("QR code data is not an integer: %r", raw)
-                        continue
-                    self._beep(config.BUZZER_BEEP_SECONDS)
-                    self._callback(entry_id)
-                    self.stop_scan()
-
-        if self._camera is None:
-            raise RuntimeError("Camera not initialized")
-
-        self._camera.stop()
-        self._camera.close()
-        self._set_led(False)
-        logger.debug("Scan thread exiting")
+                frame = self._camera.capture_array()
+                barcodes = decode(frame)
+                for barcode in barcodes:
+                    raw = bytes(barcode.data).decode("utf-8")
+                    logger.debug("Found barcode: %s (%s)", raw, barcode.type)
+                    if barcode.type == "QRCODE":
+                        if self._timeout_timer is not None:
+                            self._timeout_timer.cancel()
+                        try:
+                            entry_id = int(raw)
+                        except ValueError:
+                            logger.warning("QR code data is not an integer: %r", raw)
+                            continue
+                        Thread(target=self._beep, args=(config.BUZZER_BEEP_SECONDS,), daemon=True).start()
+                        self._callback(entry_id)
+                        self.stop_scan()
+                        break
+        finally:
+            if self._camera is not None:
+                self._camera.stop()
+                self._camera.close()
+            self._set_led(False)
+            logger.debug("Scan thread exiting")
 
     def _beep(self, seconds: float) -> None:
         """Beep the buzzer synchronously (already running in the scan thread)."""
