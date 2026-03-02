@@ -47,7 +47,7 @@ python -m frozen_hero --debug
 
 ## Database
 
-SQLite database at `database/frozen-heroSQL.db` (excluded from git via `.gitignore`).
+SQLite database at `database/frozen-hero.db` (excluded from git via `.gitignore`).
 
 Schema:
 ```sql
@@ -110,7 +110,7 @@ Public function: `print_label(row_one, row_two, date_str, entry_id) -> None`
 | `/delEntry` | POST | Deletes entry by `id` |
 
 ### `templates/index.html`
-Single-page app (vanilla JS, no framework). Two tabs: "Neues Label" (add item + print) and "Liste anzeigen" (inventory table). Swipe left/right on a row to delete it. Hardcoded to connect to `http://hero-pi.hero.home:5000`.
+Single-page app (vanilla JS, no framework). Two tabs: "Neues Label" (add item + print) and "Liste anzeigen" (inventory table). Swipe left/right on a row to delete it. Uses relative API URLs.
 
 ## Systemd Services
 
