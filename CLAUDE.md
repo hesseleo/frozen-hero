@@ -18,8 +18,8 @@ sudo apt install libzbar0 swig liblgpio-dev qrencode imagemagick libcap-dev pyth
 sudo apt install ./utils/ql600pdrv-3.1.5-0.armhf.deb
 
 # Python environment (must use --system-site-packages for picamera2)
-python -m venv venv --system-site-packages
-source venv/bin/activate
+python -m venv .venv --system-site-packages
+source .venv/bin/activate
 pip install -e .
 
 # Permissions

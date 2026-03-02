@@ -1,7 +1,3 @@
-# Copyright (c) 2022 HeRo Developers
-# Author: Leonhard Hesse
-# Created: January 2023
-
 [Unit]
 Description=frozen-hero Freezer Management System
 After=network.target
@@ -10,8 +6,8 @@ After=network.target
 Type=simple
 User=hero
 WorkingDirectory=/home/hero/frozen-hero
-Environment="PATH=/home/hero/frozen-hero/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-ExecStart=/home/hero/frozen-hero/venv/bin/python -m frozen_hero
+Environment="PATH=/home/hero/frozen-hero/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/home/hero/frozen-hero/.venv/bin/python -m frozen_hero
 Restart=on-failure
 RestartSec=5
 
