@@ -37,7 +37,14 @@ def lgpio_mock():
 
 
 @pytest.fixture()
-def scanner(lgpio_mock):
+def picamera2_mock():
+    mock = sys.modules["picamera2"]
+    mock.reset_mock()
+    return mock
+
+
+@pytest.fixture()
+def scanner(lgpio_mock, picamera2_mock):
     return QRCodeScanner(callback=MagicMock())
 
 
@@ -64,52 +71,42 @@ class TestInit:
             ANY, config.PIN_MOTION_DETECTOR, lgpio_mock.RISING_EDGE, ANY
         )
 
+    def test_cleanup_closes_camera(self, scanner):
+        scanner.cleanup()
+        scanner._camera.close.assert_called_once()
+
 
 class TestStartStop:
     def test_start_scan_opens_and_starts_camera(self, scanner):
-        with (
-            patch("frozen_hero.scanner.Picamera2") as MockCam,
-            patch("frozen_hero.scanner.decode", return_value=[]),
-        ):
+        with patch("frozen_hero.scanner.decode", return_value=[]):
             scanner.start_scan()
             time.sleep(0.05)
             scanner.stop_scan()
             scanner._scan_thread.join(timeout=2)
 
-        MockCam.assert_called_once()
-        MockCam.return_value.start.assert_called_once()
+        scanner._camera.start.assert_called_once()
 
     def test_second_start_while_active_is_ignored(self, scanner):
-        with (
-            patch("frozen_hero.scanner.Picamera2") as MockCam,
-            patch("frozen_hero.scanner.decode", return_value=[]),
-        ):
+        with patch("frozen_hero.scanner.decode", return_value=[]):
             scanner.start_scan()
             scanner.start_scan()  # must be a no-op
             time.sleep(0.05)
             scanner.stop_scan()
             scanner._scan_thread.join(timeout=2)
 
-        assert MockCam.call_count == 1
+        assert scanner._camera.start.call_count == 1
 
     def test_camera_stopped_and_closed_after_stop(self, scanner):
-        with (
-            patch("frozen_hero.scanner.Picamera2") as MockCam,
-            patch("frozen_hero.scanner.decode", return_value=[]),
-        ):
+        with patch("frozen_hero.scanner.decode", return_value=[]):
             scanner.start_scan()
             time.sleep(0.05)
             scanner.stop_scan()
             scanner._scan_thread.join(timeout=2)
 
-        MockCam.return_value.stop.assert_called_once()
-        MockCam.return_value.close.assert_called_once()
+        scanner._camera.stop.assert_called_once()
 
     def test_led_turned_off_after_stop(self, scanner, lgpio_mock):
-        with (
-            patch("frozen_hero.scanner.Picamera2"),
-            patch("frozen_hero.scanner.decode", return_value=[]),
-        ):
+        with patch("frozen_hero.scanner.decode", return_value=[]):
             scanner.start_scan()
             time.sleep(0.05)
             scanner.stop_scan()
@@ -121,10 +118,7 @@ class TestStartStop:
 class TestQRDetection:
     def test_valid_qr_code_triggers_callback(self, scanner):
         barcode = _make_barcode("42")
-        with (
-            patch("frozen_hero.scanner.Picamera2"),
-            patch("frozen_hero.scanner.decode", return_value=[barcode]),
-        ):
+        with patch("frozen_hero.scanner.decode", return_value=[barcode]):
             scanner.start_scan()
             scanner._scan_thread.join(timeout=2)
 
@@ -133,10 +127,7 @@ class TestQRDetection:
     def test_callback_called_only_once_per_scan(self, scanner):
         """Even if multiple frames contain a QR code, callback fires once."""
         barcode = _make_barcode("7")
-        with (
-            patch("frozen_hero.scanner.Picamera2"),
-            patch("frozen_hero.scanner.decode", return_value=[barcode]),
-        ):
+        with patch("frozen_hero.scanner.decode", return_value=[barcode]):
             scanner.start_scan()
             scanner._scan_thread.join(timeout=2)
 
@@ -150,10 +141,7 @@ class TestQRDetection:
             call_count[0] += 1
             return [bad_barcode] if call_count[0] == 1 else []
 
-        with (
-            patch("frozen_hero.scanner.Picamera2"),
-            patch("frozen_hero.scanner.decode", side_effect=decode_fn),
-        ):
+        with patch("frozen_hero.scanner.decode", side_effect=decode_fn):
             scanner.start_scan()
             time.sleep(0.1)
             scanner.stop_scan()
@@ -169,10 +157,7 @@ class TestQRDetection:
             call_count[0] += 1
             return [ean_barcode] if call_count[0] == 1 else []
 
-        with (
-            patch("frozen_hero.scanner.Picamera2"),
-            patch("frozen_hero.scanner.decode", side_effect=decode_fn),
-        ):
+        with patch("frozen_hero.scanner.decode", side_effect=decode_fn):
             scanner.start_scan()
             time.sleep(0.1)
             scanner.stop_scan()
@@ -184,22 +169,15 @@ class TestQRDetection:
 class TestErrorHandling:
     @pytest.mark.filterwarnings("ignore::pytest.PytestUnhandledThreadExceptionWarning")
     def test_camera_cleaned_up_when_decode_raises(self, scanner):
-        with (
-            patch("frozen_hero.scanner.Picamera2") as MockCam,
-            patch("frozen_hero.scanner.decode", side_effect=RuntimeError("camera error")),
-        ):
+        with patch("frozen_hero.scanner.decode", side_effect=RuntimeError("camera error")):
             scanner.start_scan()
             scanner._scan_thread.join(timeout=2)
 
-        MockCam.return_value.stop.assert_called_once()
-        MockCam.return_value.close.assert_called_once()
+        scanner._camera.stop.assert_called_once()
 
     @pytest.mark.filterwarnings("ignore::pytest.PytestUnhandledThreadExceptionWarning")
     def test_led_turned_off_when_decode_raises(self, scanner, lgpio_mock):
-        with (
-            patch("frozen_hero.scanner.Picamera2"),
-            patch("frozen_hero.scanner.decode", side_effect=RuntimeError("err")),
-        ):
+        with patch("frozen_hero.scanner.decode", side_effect=RuntimeError("err")):
             scanner.start_scan()
             scanner._scan_thread.join(timeout=2)
 

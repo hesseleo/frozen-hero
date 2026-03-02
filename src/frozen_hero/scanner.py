@@ -26,7 +26,6 @@ class QRCodeScanner:
     def __init__(self, callback: Callable[[int], None]) -> None:
         self._lock = Lock()
         self._callback = callback
-        self._camera: Picamera2 | None = None
         self._active: bool = False
         self._scan_thread: Thread | None = None
         self._timeout_timer: Timer | None = None
@@ -40,6 +39,11 @@ class QRCodeScanner:
         lgpio.gpio_claim_output(self._chip, config.PIN_BUZZER, 0)
         lgpio.gpio_claim_output(self._chip, config.PIN_LED, 0)
 
+        self._camera = Picamera2()
+        self._camera.configure(
+            self._camera.create_preview_configuration(main={"size": config.CAMERA_RESOLUTION})
+        )
+
     # ------------------------------------------------------------------
     # Public methods
     # ------------------------------------------------------------------
@@ -52,10 +56,6 @@ class QRCodeScanner:
             if self._scan_thread is not None:
                 self._scan_thread.join()
             self._active = True
-            self._camera = Picamera2()
-            self._camera.configure(
-                self._camera.create_preview_configuration(main={"size": config.CAMERA_RESOLUTION})
-            )
             self._camera.start()
             self._scan_thread = Thread(target=self._run_scan, daemon=True)
             self._scan_thread.start()
@@ -68,9 +68,10 @@ class QRCodeScanner:
                 self._active = False
 
     def cleanup(self) -> None:
-        """Release GPIO resources."""
+        """Release GPIO and camera resources."""
         self._motion_cb.cancel()
         lgpio.gpiochip_close(self._chip)
+        self._camera.close()
 
     # ------------------------------------------------------------------
     # Private methods
@@ -89,9 +90,6 @@ class QRCodeScanner:
 
         try:
             while self._active:
-                if self._camera is None:
-                    raise RuntimeError("Camera not initialized")
-
                 frame = self._camera.capture_array()
                 barcodes = decode(frame)
                 for barcode in barcodes:
@@ -112,9 +110,7 @@ class QRCodeScanner:
                         self.stop_scan()
                         break
         finally:
-            if self._camera is not None:
-                self._camera.stop()
-                self._camera.close()
+            self._camera.stop()
             self._set_led(False)
             logger.debug("Scan thread exiting")
 
