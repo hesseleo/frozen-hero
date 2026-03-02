@@ -10,6 +10,7 @@ Security notes
 
 import logging
 import subprocess
+import unicodedata
 from datetime import datetime
 from pathlib import Path
 from xml.sax.saxutils import escape
@@ -57,9 +58,7 @@ def print_label(row_one: str, row_two: str, date_str: str, entry_id: int) -> Non
 
 def _make_label_name(row_one: str, date: datetime) -> str:
     """Produce a filesystem-safe label name from the first row and date."""
-    name = row_one
-    for src, dst in {"ö": "oe", "ä": "ae", "ü": "ue", "Ö": "Oe", "Ä": "Ae", "Ü": "Ue"}.items():
-        name = name.replace(src, dst)
+    name = unicodedata.normalize("NFD", row_one).encode("ascii", "ignore").decode("ascii")
     for ch in ("'", '"', " "):
         name = name.replace(ch, "")
     return name + "_" + date.strftime("%Y%m%d")
