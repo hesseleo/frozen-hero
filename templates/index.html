@@ -89,13 +89,46 @@
       .field { margin-bottom: 14px; }
       .field:last-child { margin-bottom: 0; }
 
+      .field-header {
+         display: flex;
+         align-items: center;
+         gap: 5px;
+         margin-bottom: 5px;
+      }
+
       .field label {
-         display: block;
          font-size: 10pt;
          color: var(--teal-light);
-         margin-bottom: 5px;
          letter-spacing: 0.03em;
       }
+
+      .info-btn {
+         background: none;
+         border: none;
+         color: var(--teal-light);
+         font-size: 12pt;
+         line-height: 1;
+         padding: 0 2px;
+         cursor: pointer;
+         opacity: 0.6;
+         flex-shrink: 0;
+      }
+
+      .info-btn:active { opacity: 1; }
+
+      .info-tip {
+         display: none;
+         background: var(--surface-dark);
+         border-left: 3px solid var(--teal-light);
+         border-radius: 0 6px 6px 0;
+         padding: 8px 12px;
+         font-size: 10pt;
+         color: var(--gray);
+         margin-bottom: 6px;
+         line-height: 1.5;
+      }
+
+      .info-tip.open { display: block; }
 
       .field input,
       .field select {
@@ -413,18 +446,30 @@
       <div id="view-new" class="view active">
          <div class="card">
             <div class="field">
-               <label data-i18n="label_row1">Erste Zeile</label>
+               <div class="field-header">
+                  <label data-i18n="label_row1">Erste Zeile</label>
+                  <button class="info-btn" onclick="toggleTip(this)" aria-label="Info">ⓘ</button>
+               </div>
+               <div class="info-tip" data-i18n="tip_row1">Pflichtfeld. Wird als große Titelzeile auf dem Etikett gedruckt. Maximal 20 Zeichen.</div>
                <input type="text" id="dec1" maxlength="20" autocomplete="off">
             </div>
             <div class="field">
-               <label data-i18n="label_row2">Zweite Zeile</label>
+               <div class="field-header">
+                  <label data-i18n="label_row2">Zweite Zeile</label>
+                  <button class="info-btn" onclick="toggleTip(this)" aria-label="Info">ⓘ</button>
+               </div>
+               <div class="info-tip" data-i18n="tip_row2">Optional. Wird als kleinere Zusatzzeile auf dem Etikett gedruckt. Maximal 64 Zeichen.</div>
                <input type="text" id="dec2" maxlength="64" autocomplete="off">
             </div>
          </div>
 
          <div class="card">
             <div class="field">
-               <label data-i18n="label_category">Kategorie</label>
+               <div class="field-header">
+                  <label data-i18n="label_category">Kategorie</label>
+                  <button class="info-btn" onclick="toggleTip(this)" aria-label="Info">ⓘ</button>
+               </div>
+               <div class="info-tip" data-i18n="tip_category">Optional. Setzt das Haltbarkeitsdatum automatisch anhand typischer Lagerzeiten. Das Datum kann danach manuell angepasst werden.</div>
                <div class="select-wrap">
                <select id="my-select">
                   <option value="" disabled selected data-i18n="cat_placeholder">Bitte wählen …</option>
@@ -444,7 +489,11 @@
             </div>
             <div class="field-row">
                <div class="field">
-                  <label data-i18n="label_amount">Menge</label>
+                  <div class="field-header">
+                     <label data-i18n="label_amount">Menge</label>
+                     <button class="info-btn" onclick="toggleTip(this)" aria-label="Info">ⓘ</button>
+                  </div>
+                  <div class="info-tip" data-i18n="tip_amount">Optional. Anzahl der zu druckenden Etiketten in einem Durchgang.</div>
                   <select id="select_amount">
                      <option value="one">1</option>
                      <option value="two">2</option>
@@ -454,7 +503,11 @@
                   </select>
                </div>
                <div class="field">
-                  <label data-i18n="label_date">Haltbar bis</label>
+                  <div class="field-header">
+                     <label data-i18n="label_date">Haltbar bis</label>
+                     <button class="info-btn" onclick="toggleTip(this)" aria-label="Info">ⓘ</button>
+                  </div>
+                  <div class="info-tip" data-i18n="tip_date">Pflichtfeld. Das Datum wird auf das Etikett gedruckt und in der Übersicht angezeigt. Wird automatisch gesetzt, wenn eine Kategorie gewählt wird.</div>
                   <input type="date" id="date">
                </div>
             </div>
@@ -533,6 +586,11 @@
             delete:          "Löschen",
             cancel:          "Abbrechen",
             list_empty:      "Keine Einträge",
+            tip_row1:        "Pflichtfeld. Wird als große Titelzeile auf dem Etikett gedruckt. Maximal 20 Zeichen.",
+            tip_row2:        "Optional. Wird als kleinere Zusatzzeile auf dem Etikett gedruckt. Maximal 64 Zeichen.",
+            tip_category:    "Optional. Setzt das Haltbarkeitsdatum automatisch anhand typischer Lagerzeiten. Das Datum kann danach manuell angepasst werden.",
+            tip_amount:      "Optional. Anzahl der zu druckenden Etiketten in einem Durchgang.",
+            tip_date:        "Pflichtfeld. Das Datum wird auf das Etikett gedruckt und in der Übersicht angezeigt. Wird automatisch gesetzt, wenn eine Kategorie gewählt wird.",
          },
          en: {
             tab_new_label:  "New Label",
@@ -556,6 +614,11 @@
             cat_butter:     "Butter",
             cat_cake:       "Cake",
             cat_fish:       "Fish",
+            tip_row1:        "Required. Printed as the large title on the label. Maximum 20 characters.",
+            tip_row2:        "Optional. Printed as a smaller subtitle on the label. Maximum 64 characters.",
+            tip_category:    "Optional. Automatically sets the best-before date based on typical shelf life per category. The date can be adjusted manually afterwards.",
+            tip_amount:      "Optional. How many labels to print in one go.",
+            tip_date:        "Required. Printed on the label and shown in the inventory. Automatically set when a category is selected.",
             delete_confirm:  "Delete {name}?",
             delete_title:    "Delete entry",
             delete:          "Delete",
@@ -775,6 +838,20 @@
          }
          sendOne();
       }
+
+      // ── Info tips ──────────────────────────────────────────────────────
+      function toggleTip(btn) {
+         const tip = btn.closest('.field-header').nextElementSibling;
+         const isOpen = tip.classList.contains('open');
+         document.querySelectorAll('.info-tip.open').forEach(t => t.classList.remove('open'));
+         if (!isOpen) tip.classList.add('open');
+      }
+
+      document.addEventListener('click', function(e) {
+         if (!e.target.closest('.info-btn')) {
+            document.querySelectorAll('.info-tip.open').forEach(t => t.classList.remove('open'));
+         }
+      });
 
       // ── Init ───────────────────────────────────────────────────────────
       document.getElementById('date').value = getDateFormat();
