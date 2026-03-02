@@ -1,6 +1,7 @@
 """Flask application factory for frozen-hero."""
 
 import logging
+from datetime import datetime
 
 from flask import Flask, abort, jsonify, render_template, request, send_from_directory
 
@@ -67,6 +68,11 @@ def create_app() -> Flask:
             abort(400)
 
         try:
+            datetime.strptime(date, "%Y-%m-%d")
+        except ValueError:
+            abort(400)
+
+        try:
             entry_id = db.add_entry(row1, row2, category, date)
         except Exception:
             logger.exception("Failed to insert entry")
@@ -105,10 +111,13 @@ def create_app() -> Flask:
             abort(400)
 
         try:
-            db.delete_entry(entry_id)
+            removed = db.delete_entry(entry_id)
         except Exception:
             logger.exception("Failed to delete entry %d", entry_id)
             abort(500)
+
+        if not removed:
+            abort(404)
 
         return jsonify(success=True), 200
 
