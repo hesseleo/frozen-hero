@@ -33,6 +33,7 @@ class QRCodeScanner:
 
         self._chip = lgpio.gpiochip_open(0)
         lgpio.gpio_claim_alert(self._chip, config.PIN_MOTION_DETECTOR, lgpio.RISING_EDGE)
+        lgpio.gpio_set_debounce_micros(self._chip, config.PIN_MOTION_DETECTOR, config.PIN_MOTION_DEBOUNCE_US)
         self._motion_cb = lgpio.callback(
             self._chip, config.PIN_MOTION_DETECTOR, lgpio.RISING_EDGE, self._on_motion
         )

@@ -28,6 +28,10 @@ PIN_MOTION_DETECTOR: int = 18
 PIN_BUZZER: int = 23
 PIN_LED: int = 24
 
+# Debounce time for the PIR motion detector alert (microseconds).
+# Suppresses rapid chatter on the rising edge without delaying real events.
+PIN_MOTION_DEBOUNCE_US: int = 300_000
+
 # ---------------------------------------------------------------------------
 # Camera
 # ---------------------------------------------------------------------------
