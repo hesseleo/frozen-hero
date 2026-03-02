@@ -34,9 +34,7 @@ class QRCodeScanner:
         GPIO.setmode(GPIO.BCM)
 
         GPIO.setup(config.PIN_MOTION_DETECTOR, GPIO.IN)
-        GPIO.add_event_detect(
-            config.PIN_MOTION_DETECTOR, GPIO.RISING, callback=self._on_motion
-        )
+        GPIO.add_event_detect(config.PIN_MOTION_DETECTOR, GPIO.RISING, callback=self._on_motion)
 
         GPIO.setup(config.PIN_BUZZER, GPIO.OUT)
         GPIO.output(config.PIN_BUZZER, GPIO.LOW)
@@ -58,9 +56,7 @@ class QRCodeScanner:
             self._active = True
             self._camera = Picamera2()
             self._camera.configure(
-                self._camera.create_preview_configuration(
-                    main={"size": config.CAMERA_RESOLUTION}
-                )
+                self._camera.create_preview_configuration(main={"size": config.CAMERA_RESOLUTION})
             )
             self._camera.start()
             self._scan_thread = Thread(target=self._run_scan, daemon=True)
@@ -106,7 +102,9 @@ class QRCodeScanner:
                         except ValueError:
                             logger.warning("QR code data is not an integer: %r", raw)
                             continue
-                        Thread(target=self._beep, args=(config.BUZZER_BEEP_SECONDS,), daemon=True).start()
+                        Thread(
+                            target=self._beep, args=(config.BUZZER_BEEP_SECONDS,), daemon=True
+                        ).start()
                         self._callback(entry_id)
                         self.stop_scan()
                         break

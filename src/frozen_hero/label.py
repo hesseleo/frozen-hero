@@ -99,8 +99,10 @@ def _render_text_image(
 
     cmd = [
         "convert",
-        "-gravity", "center",
-        "-size", f"{config.TEXT_WIDTH_PX}x{config.LABEL_HEIGHT_PX}",
+        "-gravity",
+        "center",
+        "-size",
+        f"{config.TEXT_WIDTH_PX}x{config.LABEL_HEIGHT_PX}",
         f"pango:{pango_markup}",
         str(out_path),
     ]
@@ -111,11 +113,16 @@ def _generate_qr_code(entry_id: int, out_path: Path) -> None:
     """Generate a QR code PNG encoding the database entry id."""
     cmd = [
         "qrencode",
-        "-o", str(out_path),
-        "-m", "1",
-        "-d", "300",
-        "-s", str(config.QR_CODE_SIZE),
-        "-l", "h",
+        "-o",
+        str(out_path),
+        "-m",
+        "1",
+        "-d",
+        "300",
+        "-s",
+        str(config.QR_CODE_SIZE),
+        "-l",
+        "h",
         str(entry_id),
     ]
     subprocess.run(cmd, check=True)
@@ -132,8 +139,10 @@ def _compose_label(txt_path: Path, qr_path: Path, label_path: Path) -> None:
     subprocess.run(
         [
             "convert",
-            "-bordercolor", "black",
-            "-border", str(config.BORDER_SIZE_PX),
+            "-bordercolor",
+            "black",
+            "-border",
+            str(config.BORDER_SIZE_PX),
             str(label_path),
             str(label_path),
         ],
@@ -146,10 +155,13 @@ def _print(label_path: Path) -> None:
     subprocess.run(
         [
             "brother_ql",
-            "-m", config.PRINTER_MODEL,
-            "-p", config.PRINTER_ADDRESS,
+            "-m",
+            config.PRINTER_MODEL,
+            "-p",
+            config.PRINTER_ADDRESS,
             "print",
-            "-l", config.LABEL_WIDTH_MM,
+            "-l",
+            config.LABEL_WIDTH_MM,
             str(label_path),
         ],
         check=True,

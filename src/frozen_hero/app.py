@@ -28,9 +28,7 @@ def create_app() -> Flask:
 
     @app.route("/apple-touch-icon.png")
     def touchicon() -> object:
-        return send_from_directory(
-            config.STATIC_DIR, "apple-touch-icon.png", mimetype="image/png"
-        )
+        return send_from_directory(config.STATIC_DIR, "apple-touch-icon.png", mimetype="image/png")
 
     # ------------------------------------------------------------------
     # Main UI
