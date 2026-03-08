@@ -63,14 +63,8 @@ _QR_HEIGHT_PX: int = 23 * QR_CODE_SIZE
 TEXT_WIDTH_PX: int = PRINTABLE_WIDTH_PX - _QR_HEIGHT_PX - (2 * BORDER_SIZE_PX)
 LABEL_HEIGHT_PX: int = _QR_HEIGHT_PX
 
-# Pango text positioning (rise values in Pango units)
-PANGO_SCALE: int = 512
-_SMALL_SPACE: int = int(_QR_HEIGHT_PX / 6) * PANGO_SCALE
-PANGO_RISE_TITLE: int = _SMALL_SPACE
-PANGO_RISE_SUBTITLE: int = 2 * _SMALL_SPACE
-PANGO_RISE_DATE: int = int(4.8 * _SMALL_SPACE)
-# When subtitle wraps to two lines, move the date up to avoid overlap.
-PANGO_RISE_DATE_TWO_LINES: int = 3 * _SMALL_SPACE
+# Quiet zone added by qrencode -m 1 (1 module on each side)
+QR_MARGIN_PX: int = QR_CODE_SIZE
 
 # Maximum subtitle length before it wraps to a second line
 MAX_SUBTITLE_LEN: int = 32

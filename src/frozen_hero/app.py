@@ -54,6 +54,7 @@ def create_app(template_mode: bool = False) -> Flask:
         row2 = body.get("row2", "")
         category = body.get("category", "")
         date = body.get("date", "")
+        lang = body.get("lang", "de")
 
         if not row1 or not date:
             abort(400)
@@ -65,7 +66,7 @@ def create_app(template_mode: bool = False) -> Flask:
 
         if current_app.config["TEMPLATE_MODE"]:
             try:
-                preview_path = label.generate_label(row1, row2, date, 0)
+                preview_path = label.generate_label(row1, row2, date, 0, lang=lang)
                 logger.info("Template mode: label preview written to %s", preview_path)
             except Exception:
                 logger.exception("Label preview generation failed")
@@ -82,7 +83,7 @@ def create_app(template_mode: bool = False) -> Flask:
             abort(500)
 
         try:
-            label_path = label.generate_label(row1, row2, date, entry_id)
+            label_path = label.generate_label(row1, row2, date, entry_id, lang=lang)
             label.print_label(label_path)
         except Exception:
             # Label printing is non-fatal — the item is already in the DB.

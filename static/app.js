@@ -299,7 +299,7 @@ function printButtonClick() {
 
    if (!row1 || !date) return;
 
-   const data = { row1, row2, category: choosenCategory, date };
+   const data = { row1, row2, category: choosenCategory, date, lang: currentLang };
    let sent = 0;
 
    showToast(t('modal_printing'));
