@@ -72,7 +72,17 @@ def create_app(template_mode: bool = False) -> Flask:
                 logger.exception("Label preview generation failed")
                 abort(500)
             return (
-                jsonify({"result": {"id": 0, "dec1": row1, "dec2": row2, "category": category, "date": date}}),
+                jsonify(
+                    {
+                        "result": {
+                            "id": 0,
+                            "dec1": row1,
+                            "dec2": row2,
+                            "category": category,
+                            "date": date,
+                        }
+                    }
+                ),
                 201,
             )
 
