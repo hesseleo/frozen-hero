@@ -61,12 +61,7 @@ pip install -e .
 ### Permissions
 
 ```bash
-# Camera access
-sudo usermod -aG video $USER
-
-# USB printer access
-sudo sh -c 'echo "SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"04f9\", ATTRS{idProduct}==\"20c0\", MODE=\"0666\"" > /etc/udev/rules.d/99-brother.rules'
-sudo udevadm control --reload-rules && sudo udevadm trigger
+sudo usermod -aG video,lp $USER
 ```
 
 ### Autostart

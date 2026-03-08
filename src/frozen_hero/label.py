@@ -270,6 +270,7 @@ def _print(label_path: Path) -> None:
     subprocess.run(
         [
             "brother_ql",
+            "-b", "linux_kernel",
             "-m", config.PRINTER_MODEL,
             "-p", config.PRINTER_ADDRESS,
             "print",
