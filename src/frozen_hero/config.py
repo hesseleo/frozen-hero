@@ -47,7 +47,7 @@ BUZZER_BEEP_SECONDS: float = 0.1
 # Printer
 # ---------------------------------------------------------------------------
 PRINTER_MODEL: str = "QL-580N"
-PRINTER_ADDRESS: str = "usb://04f9:20c0/000D0Z248231"
+PRINTER_ADDRESS: str = "file:///dev/usb/lp0"
 LABEL_WIDTH_MM: str = "62"
 
 # ---------------------------------------------------------------------------
