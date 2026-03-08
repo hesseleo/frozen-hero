@@ -29,6 +29,7 @@ const TRANSLATIONS = {
       sort_date:       "Datum",
       sort_name:       "Name",
       sort_label:      "Sortierung:",
+      filter_placeholder: "Suchen…",
       tip_row1:        "Pflichtfeld. Wird als große Titelzeile auf dem Etikett gedruckt. Maximal 20 Zeichen.",
       tip_row2:        "Optional. Wird als kleinere Zusatzzeile auf dem Etikett gedruckt. Maximal 64 Zeichen.",
       tip_category:    "Optional. Setzt das Haltbarkeitsdatum automatisch anhand typischer Lagerzeiten. Das Datum kann danach manuell angepasst werden.",
@@ -69,6 +70,7 @@ const TRANSLATIONS = {
       sort_date:       "Date",
       sort_name:       "Name",
       sort_label:      "Sort by:",
+      filter_placeholder: "Search…",
    },
 };
 
@@ -88,6 +90,9 @@ function setLanguage(lang) {
    });
    document.querySelectorAll('[data-i18n-static]').forEach(el => {
       el.textContent = t(el.dataset.i18nStatic);
+   });
+   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      el.placeholder = t(el.dataset.i18nPlaceholder);
    });
    document.querySelectorAll('[data-iso-date]').forEach(el => {
       el.textContent = formatDisplayDate(el.dataset.isoDate);
@@ -133,33 +138,61 @@ function fetchEntries(cb) {
 }
 
 let listSort = 'date';
+let listFilter = '';
+let cachedList = [];
 
-function updateList() { fetchEntries(renderList); }
+function updateList() { fetchEntries(list => { cachedList = list; renderList(list); }); }
 
 function setSort(mode) {
    listSort = mode;
    document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === mode));
-   updateList();
+   renderList(cachedList);
 }
 
 function renderList(list) {
    const container = document.getElementById('list-container');
-   container.innerHTML = '';
 
-   // Sort bar
-   const bar = document.createElement('div');
-   bar.className = 'sort-bar';
-   ['date', 'name'].forEach(mode => {
-      const btn = document.createElement('button');
-      btn.className = 'sort-btn' + (listSort === mode ? ' active' : '');
-      btn.dataset.sort = mode;
-      btn.textContent = t('sort_' + mode);
-      btn.addEventListener('click', () => setSort(mode));
-      bar.appendChild(btn);
+   // Sort bar: create once, never destroy (preserves filter input focus).
+   let bar = container.querySelector('.sort-bar');
+   if (!bar) {
+      bar = document.createElement('div');
+      bar.className = 'sort-bar';
+
+      const filterInput = document.createElement('input');
+      filterInput.type = 'text';
+      filterInput.className = 'list-filter';
+      filterInput.placeholder = t('filter_placeholder');
+      filterInput.dataset.i18nPlaceholder = 'filter_placeholder';
+      filterInput.addEventListener('input', function() {
+         listFilter = this.value;
+         renderList(cachedList);
+      });
+      bar.appendChild(filterInput);
+
+      ['date', 'name'].forEach(mode => {
+         const btn = document.createElement('button');
+         btn.dataset.sort = mode;
+         btn.addEventListener('click', () => setSort(mode));
+         bar.appendChild(btn);
+      });
+      container.appendChild(bar);
+   }
+
+   // Keep sort buttons in sync.
+   bar.querySelectorAll('.sort-btn, [data-sort]').forEach(btn => {
+      btn.className = 'sort-btn' + (btn.dataset.sort === listSort ? ' active' : '');
+      btn.textContent = t('sort_' + btn.dataset.sort);
    });
-   container.appendChild(bar);
 
-   if (list.length === 0) {
+   // Remove only the items (everything after the bar).
+   while (bar.nextSibling) bar.nextSibling.remove();
+
+   const query = listFilter.trim().toLowerCase();
+   const filtered = query
+      ? list.filter(e => e.row_one.toLowerCase().includes(query) || (e.row_two || '').toLowerCase().includes(query))
+      : list;
+
+   if (filtered.length === 0) {
       const el = document.createElement('div');
       el.className = 'list-empty';
       el.textContent = t('list_empty');
@@ -167,7 +200,7 @@ function renderList(list) {
       return;
    }
 
-   const sorted = list.slice().sort((a, b) =>
+   const sorted = filtered.slice().sort((a, b) =>
       listSort === 'name'
          ? a.row_one.localeCompare(b.row_one)
          : a.date.localeCompare(b.date)

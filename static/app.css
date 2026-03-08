@@ -190,9 +190,27 @@ main {
 /* ── Sort bar ───────────────────────────────── */
 .sort-bar {
    display: flex;
+   align-items: center;
    justify-content: flex-end;
    gap: 8px;
    margin-bottom: 12px;
+}
+
+.list-filter {
+   flex: 1;
+   font-family: inherit;
+   font-size: 10pt;
+   background: var(--surface-dark);
+   color: var(--text);
+   border: none;
+   border-radius: 20px;
+   padding: 4px 12px;
+   outline: none;
+   min-width: 0;
+}
+
+.list-filter:focus {
+   box-shadow: 0 0 0 2px var(--teal-light);
 }
 
 .sort-btn {
