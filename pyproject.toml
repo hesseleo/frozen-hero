@@ -26,7 +26,6 @@ dependencies = [
     "lgpio",
     "pyzbar",
     "brother-ql",
-    "pillow",
 ]
 
 [project.urls]
