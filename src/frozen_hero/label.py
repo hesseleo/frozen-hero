@@ -15,9 +15,11 @@ from datetime import datetime
 from pathlib import Path
 from xml.sax.saxutils import escape
 
-from frozen_hero import config
+from frozen_hero import __version__, config
 
 logger = logging.getLogger(__name__)
+
+_APP_VERSION: str = f"v{__version__}"
 
 
 # ---------------------------------------------------------------------------
@@ -98,15 +100,19 @@ def _pango_span(text: str, size: int) -> str:
     return f'<span foreground="black" font_family="Roboto Mono" size="{size}">{escape(text)}</span>'
 
 
-def _render_element(markup: str, width_px: int, tmp_path: Path) -> int:
+def _render_element(
+    markup: str, width_px: int, tmp_path: Path, align: str = "center", bg: str = "white"
+) -> int:
     """Render a single Pango markup string to a PNG and return its pixel height."""
     subprocess.run(
         [
             "convert",
+            "-background",
+            bg,
             "-size",
             f"{width_px}x",
             "-define",
-            "pango:align=center",
+            f"pango:align={align}",
             f"pango:{markup}",
             str(tmp_path),
         ],
@@ -143,6 +149,8 @@ def _render_text_image(
     title_tmp = out_path.with_suffix(".title_tmp.png")
     sub_tmp = out_path.with_suffix(".sub_tmp.png")
     date_tmp = out_path.with_suffix(".date_tmp.png")
+    footer_left_tmp = out_path.with_suffix(".footer_left_tmp.png")
+    footer_right_tmp = out_path.with_suffix(".footer_right_tmp.png")
 
     try:
         w = config.TEXT_WIDTH_PX
@@ -151,29 +159,39 @@ def _render_text_image(
 
         # Render into (w - m) so both left and right have equal QR_MARGIN_PX inset.
         tw = w - m
+        # Footer canvas aligns with separator ends: starts at 2*m, ends at w-m.
+        fw = tw - m
         title_h = _render_element(_pango_span(row_one, 28000), tw, title_tmp)
         date_h  = _render_element(_pango_span(date_label, 24000), tw, date_tmp)
         if row_two:
             _render_element(_pango_span(row_two, 18000), tw, sub_tmp)
+        footer_h = _render_element(
+            _pango_span("Frozen HeRo", 14000), fw, footer_left_tmp, align="left", bg="none"
+        )
+        _render_element(
+            _pango_span(_APP_VERSION, 14000), fw, footer_right_tmp, align="right", bg="none"
+        )
+
+        # Working bottom-up: footer at bottom, separator above it, date above separator.
+        y_footer = h - m - footer_h
+        y_sep    = y_footer - config.BORDER_SIZE_PX - config.QR_MARGIN_PX
+        y_date   = y_sep - m - date_h
 
         # Title and subtitle are a visual group — keep them close together.
-        # All remaining vertical space goes between the subtitle and the date.
         y_title = m
         y_sub = y_title + title_h + m
-        y_date = h - m - date_h
-
-        # Separator line: same gap above the date as the outer border around the label.
-        y_sep = y_date - config.BORDER_SIZE_PX - config.QR_MARGIN_PX
 
         # Create white canvas, composite text elements, draw separator.
         subprocess.run(
             ["convert", "-size", f"{w}x{h}", "xc:white", str(out_path)],
             check=True,
         )
-        elements = [(title_tmp, y_title), (date_tmp, y_date)]
+        # (tmp, x, y) — title/subtitle/date use m inset; footer aligns with separator at 2*m.
+        elements: list[tuple[Path, int, int]] = [(title_tmp, m, y_title), (date_tmp, m, y_date)]
         if row_two:
-            elements.insert(1, (sub_tmp, y_sub))
-        for tmp, y in elements:
+            elements.insert(1, (sub_tmp, m, y_sub))
+        elements += [(footer_left_tmp, 2 * m, y_footer), (footer_right_tmp, m, y_footer)]
+        for tmp, x, y in elements:
             subprocess.run(
                 [
                     "convert",
@@ -182,7 +200,7 @@ def _render_text_image(
                     "NorthWest",
                     str(tmp),
                     "-geometry",
-                    f"+{m}+{y}",
+                    f"+{x}+{y}",
                     "-composite",
                     str(out_path),
                 ],
@@ -203,7 +221,7 @@ def _render_text_image(
             check=True,
         )
     finally:
-        _cleanup(title_tmp, sub_tmp, date_tmp)
+        _cleanup(title_tmp, sub_tmp, date_tmp, footer_left_tmp, footer_right_tmp)
 
 
 def _generate_qr_code(entry_id: int, out_path: Path) -> None:
