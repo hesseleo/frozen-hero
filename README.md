@@ -102,3 +102,14 @@ python -m frozen_hero
 ```
 
 The web UI is available at `http://<HOSTNAME>:5000`.
+
+## Releasing
+
+Releases are automated via GitHub Actions. The workflow bumps the version in `pyproject.toml`,
+commits, tags, builds the package, and publishes to PyPI — all from a single manual trigger.
+
+### Triggering a release
+
+1. Go to **GitHub → Actions → Release → Run workflow**
+2. Enter the new version (e.g. `0.2.0`) and click **Run workflow**
+3. The workflow will commit `chore: bump version to v0.2.0`, push the tag `v0.2.0`, and publish to PyPI
