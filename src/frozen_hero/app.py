@@ -3,14 +3,14 @@
 import logging
 from datetime import datetime
 
-from flask import Flask, abort, jsonify, render_template, request
+from flask import Flask, abort, current_app, jsonify, render_template, request
 
 from frozen_hero import config, db, label
 
 logger = logging.getLogger(__name__)
 
 
-def create_app() -> Flask:
+def create_app(template_mode: bool = False) -> Flask:
     """Create and configure the Flask application."""
     db.init_db()
 
@@ -19,6 +19,9 @@ def create_app() -> Flask:
         template_folder=str(config.TEMPLATES_DIR),
         static_folder=str(config.STATIC_DIR),
     )
+    app.config["TEMPLATE_MODE"] = template_mode
+    if template_mode:
+        logger.info("Template mode enabled — DB and printer will be skipped")
 
     # ------------------------------------------------------------------
     # Main UI
@@ -60,6 +63,18 @@ def create_app() -> Flask:
         except ValueError:
             abort(400)
 
+        if current_app.config["TEMPLATE_MODE"]:
+            try:
+                preview_path = label.generate_label(row1, row2, date, 0)
+                logger.info("Template mode: label preview written to %s", preview_path)
+            except Exception:
+                logger.exception("Label preview generation failed")
+                abort(500)
+            return (
+                jsonify({"result": {"id": 0, "dec1": row1, "dec2": row2, "category": category, "date": date}}),
+                201,
+            )
+
         try:
             entry_id = db.add_entry(row1, row2, category, date)
         except Exception:
@@ -67,7 +82,8 @@ def create_app() -> Flask:
             abort(500)
 
         try:
-            label.print_label(row1, row2, date, entry_id)
+            label_path = label.generate_label(row1, row2, date, entry_id)
+            label.print_label(label_path)
         except Exception:
             # Label printing is non-fatal — the item is already in the DB.
             logger.exception("Label printing failed for entry %d", entry_id)

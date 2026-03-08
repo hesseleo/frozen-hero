@@ -25,15 +25,11 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 
-def print_label(row_one: str, row_two: str, date_str: str, entry_id: int) -> None:
-    """Generate and print a label for a freezer entry.
+def generate_label(row_one: str, row_two: str, date_str: str, entry_id: int) -> Path:
+    """Render and compose a label image, returning the path to the JPG.
 
-    Parameters
-    ----------
-    row_one:    First text line (title).
-    row_two:    Second text line (subtitle).
-    date_str:   Best-before date as "YYYY-MM-DD".
-    entry_id:   Database row id encoded in the QR code.
+    The caller is responsible for deleting the file when done.
+    Intermediate temp files (text PNG, QR PNG) are removed before returning.
     """
     best_before = datetime.strptime(date_str, "%Y-%m-%d")
     label_name = _make_label_name(row_one, best_before)
@@ -47,9 +43,18 @@ def print_label(row_one: str, row_two: str, date_str: str, entry_id: int) -> Non
         _render_text_image(row_one, row_two, best_before, txt_path)
         _generate_qr_code(entry_id, qr_path)
         _compose_label(txt_path, qr_path, label_path)
+    finally:
+        _cleanup(txt_path, qr_path)
+
+    return label_path
+
+
+def print_label(label_path: Path) -> None:
+    """Send a label image to the printer and delete it afterwards."""
+    try:
         _print(label_path)
     finally:
-        _cleanup(txt_path, qr_path, label_path)
+        _cleanup(label_path)
 
 
 # ---------------------------------------------------------------------------

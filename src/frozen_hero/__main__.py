@@ -48,6 +48,11 @@ def main() -> None:
         action="store_true",
         help="Skip GPIO / camera initialisation (for desktop development)",
     )
+    parser.add_argument(
+        "--template",
+        action="store_true",
+        help="Template mode: generate label preview only, skip DB and printer",
+    )
     args = parser.parse_args()
 
     _configure_logging(args.debug)
@@ -57,7 +62,7 @@ def main() -> None:
 
     signal.signal(signal.SIGINT, _signal_handler)
 
-    app = create_app()
+    app = create_app(template_mode=args.template)
 
     if not args.no_hardware:
         from frozen_hero.scanner import QRCodeScanner
