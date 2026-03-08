@@ -11,3 +11,6 @@ venv/
 dist/
 tmp/
 update-pi
+.env
+.env.*
+.DS_Store

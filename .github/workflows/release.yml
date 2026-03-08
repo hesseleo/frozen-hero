@@ -27,6 +27,9 @@ jobs:
       - name: Install build
         run: pip install build
 
+      - name: Validate version format
+        run: echo "${{ github.event.inputs.version }}" | grep -E '^\d+\.\d+\.\d+$'
+
       - name: Bump version in pyproject.toml
         run: |
           sed -i 's/^version = ".*"/version = "${{ github.event.inputs.version }}"/' pyproject.toml

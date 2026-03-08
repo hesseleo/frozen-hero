@@ -20,11 +20,11 @@ A freezer inventory system. Add items via a web UI and a QR-code label is printe
 | Label printer | Brother QL-600 (62 mm tape) | [brother.de][4]
 | Feedback | Buzzer on GPIO 23, LED on GPIO 24 | [roboter-bausatz.de][5]
 
-[1]: (https://www.raspberrypi.com/products/raspberry-pi-3-model-a-plus/)
-[2]: (https://www.berrybase.de/en/detail/019234a47da57169b9528f4494a79d4c)
-[3]: (https://www.roboter-bausatz.de/p/ir-infrarot-sensor-hinderniserkennung-abstandssensor?sPartner=8&gad_source=1&gad_campaignid=12461217733&gbraid=0AAAAADKFiCD4XXSAgRBpw0zhqrclMnJXt&gclid=CjwKCAiAh5XNBhAAEiwA_Bu8FTuyFZUF0pXnI1LooVUNZXRqBCvG0g2XD8kBqjvOrPQ9rhLXEw8TThoCADMQAvD_BwE)
-[4]: (https://store.brother.de/geraete/etikettendrucker/ql/ql600g?srsltid=AfmBOorjSMEOkkumK52NTRb9omN5WG3jgbD0q1TNCIWYdhDHQmGC4MSd)
-[5]: (https://www.roboter-bausatz.de/p/10-stueck-aktiver-buzzer-3-3v-5v?sPartner=8&gad_source=1&gad_campaignid=12461217733&gclid=CjwKCAiAh5XNBhAAEiwA_Bu8FcOTPd0QJVJWvRRFX2prPKh9OBtapMEYlnr5ULDYgHG_L2zlHQq_XxoCrgYQAvD_BwE)
+[1]: https://www.raspberrypi.com/products/raspberry-pi-3-model-a-plus/
+[2]: https://www.berrybase.de/en/detail/019234a47da57169b9528f4494a79d4c
+[3]: https://www.roboter-bausatz.de/p/ir-infrarot-sensor-hinderniserkennung-abstandssensor?sPartner=8&gad_source=1&gad_campaignid=12461217733&gbraid=0AAAAADKFiCD4XXSAgRBpw0zhqrclMnJXt&gclid=CjwKCAiAh5XNBhAAEiwA_Bu8FTuyFZUF0pXnI1LooVUNZXRqBCvG0g2XD8kBqjvOrPQ9rhLXEw8TThoCADMQAvD_BwE
+[4]: https://store.brother.de/geraete/etikettendrucker/ql/ql600g?srsltid=AfmBOorjSMEOkkumK52NTRb9omN5WG3jgbD0q1TNCIWYdhDHQmGC4MSd
+[5]: https://www.roboter-bausatz.de/p/10-stueck-aktiver-buzzer-3-3v-5v?sPartner=8&gad_source=1&gad_campaignid=12461217733&gclid=CjwKCAiAh5XNBhAAEiwA_Bu8FcOTPd0QJVJWvRRFX2prPKh9OBtapMEYlnr5ULDYgHG_L2zlHQq_XxoCrgYQAvD_BwE
 
 ## Software stack
 
@@ -62,7 +62,7 @@ pip install -e .
 
 ```bash
 # Camera access
-sudo usermod -aG video hero
+sudo usermod -aG video $USER
 
 # USB printer access
 sudo sh -c 'echo "SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"04f9\", ATTRS{idProduct}==\"20c0\", MODE=\"0666\"" > /etc/udev/rules.d/99-brother.rules'

@@ -6,6 +6,17 @@ build-backend = "setuptools.build_meta"
 name = "frozen-hero"
 version = "0.1.0"
 description = "Freezer Inventory Management System"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Leonhard Hesse", email = "service@hero-devs.de" }]
+keywords = ["freezer", "inventory", "qr-code", "raspberry-pi", "flask"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+]
 requires-python = ">=3.11"
 dependencies = [
     # picamera2 is NOT listed here — it is a system package installed via apt
@@ -17,6 +28,10 @@ dependencies = [
     "brother-ql",
     "pillow",
 ]
+
+[project.urls]
+Repository = "https://github.com/hesseleo/frozen-hero"
+"Bug Tracker" = "https://github.com/hesseleo/frozen-hero/issues"
 
 [project.optional-dependencies]
 dev = ["pytest"]
