@@ -26,6 +26,9 @@ const TRANSLATIONS = {
       delete:          "Löschen",
       cancel:          "Abbrechen",
       list_empty:      "Keine Einträge",
+      sort_date:       "Datum",
+      sort_name:       "Name",
+      sort_label:      "Sortierung:",
       tip_row1:        "Pflichtfeld. Wird als große Titelzeile auf dem Etikett gedruckt. Maximal 20 Zeichen.",
       tip_row2:        "Optional. Wird als kleinere Zusatzzeile auf dem Etikett gedruckt. Maximal 64 Zeichen.",
       tip_category:    "Optional. Setzt das Haltbarkeitsdatum automatisch anhand typischer Lagerzeiten. Das Datum kann danach manuell angepasst werden.",
@@ -63,6 +66,9 @@ const TRANSLATIONS = {
       delete:          "Delete",
       cancel:          "Cancel",
       list_empty:      "No entries",
+      sort_date:       "Date",
+      sort_name:       "Name",
+      sort_label:      "Sort by:",
    },
 };
 
@@ -86,6 +92,9 @@ function setLanguage(lang) {
    document.querySelectorAll('[data-iso-date]').forEach(el => {
       el.textContent = formatDisplayDate(el.dataset.isoDate);
    });
+   document.querySelectorAll('.sort-btn').forEach(btn => {
+      btn.textContent = t('sort_' + btn.dataset.sort);
+   });
    document.getElementById('lang-select').value = lang;
 }
 
@@ -98,9 +107,6 @@ function showView(name) {
    if (name === 'list') updateList();
 }
 
-// ── Swipe library (minified) ───────────────────────────────────────
-!function(t,e){"use strict";"function"!=typeof t.CustomEvent&&(t.CustomEvent=function(t,n){n=n||{bubbles:!1,cancelable:!1,detail:void 0};var a=e.createEvent("CustomEvent");return a.initCustomEvent(t,n.bubbles,n.cancelable,n.detail),a},t.CustomEvent.prototype=t.Event.prototype),e.addEventListener("touchstart",function(t){if("true"===t.target.getAttribute("data-swipe-ignore"))return;s=t.target,r=Date.now(),n=t.touches[0].clientX,a=t.touches[0].clientY,u=0,i=0},!1),e.addEventListener("touchmove",function(t){if(!n||!a)return;var e=t.touches[0].clientX,r=t.touches[0].clientY;u=n-e,i=a-r},!1),e.addEventListener("touchend",function(t){if(s!==t.target)return;var e=parseInt(l(s,"data-swipe-threshold","20"),10),o=parseInt(l(s,"data-swipe-timeout","500"),10),c=Date.now()-r,d="",p=t.changedTouches||t.touches||[];Math.abs(u)>Math.abs(i)?Math.abs(u)>e&&c<o&&(d=u>0?"swiped-left":"swiped-right"):Math.abs(i)>e&&c<o&&(d=i>0?"swiped-up":"swiped-down");if(""!==d){var b={dir:d.replace(/swiped-/,""),touchType:(p[0]||{}).touchType||"direct",xStart:parseInt(n,10),xEnd:parseInt((p[0]||{}).clientX||-1,10),yStart:parseInt(a,10),yEnd:parseInt((p[0]||{}).clientY||-1,10)};s.dispatchEvent(new CustomEvent("swiped",{bubbles:!0,cancelable:!0,detail:b})),s.dispatchEvent(new CustomEvent(d,{bubbles:!0,cancelable:!0,detail:b}))}n=null,a=null,r=null},!1);var n=null,a=null,u=null,i=null,r=null,s=null;function l(t,n,a){for(;t&&t!==e.documentElement;){var u=t.getAttribute(n);if(u)return u;t=t.parentNode}return a}}(window,document);
-
 // ── Utilities ──────────────────────────────────────────────────────
 function getDateFormat(date = new Date()) {
    const d = String(date.getDate()).padStart(2, '0');
@@ -112,7 +118,7 @@ function formatDisplayDate(iso) {
    const [y, m, d] = iso.split('-');
    const date = new Date(+y, +m - 1, +d);
    const locale = currentLang === 'de' ? 'de-DE' : 'en-GB';
-   return new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
+   return new Intl.DateTimeFormat(locale, { day: '2-digit', month: '2-digit', year: '2-digit' }).format(date);
 }
 
 // ── Data ───────────────────────────────────────────────────────────
@@ -126,11 +132,32 @@ function fetchEntries(cb) {
    xhr.send(null);
 }
 
+let listSort = 'date';
+
 function updateList() { fetchEntries(renderList); }
+
+function setSort(mode) {
+   listSort = mode;
+   document.querySelectorAll('.sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === mode));
+   updateList();
+}
 
 function renderList(list) {
    const container = document.getElementById('list-container');
    container.innerHTML = '';
+
+   // Sort bar
+   const bar = document.createElement('div');
+   bar.className = 'sort-bar';
+   ['date', 'name'].forEach(mode => {
+      const btn = document.createElement('button');
+      btn.className = 'sort-btn' + (listSort === mode ? ' active' : '');
+      btn.dataset.sort = mode;
+      btn.textContent = t('sort_' + mode);
+      btn.addEventListener('click', () => setSort(mode));
+      bar.appendChild(btn);
+   });
+   container.appendChild(bar);
 
    if (list.length === 0) {
       const el = document.createElement('div');
@@ -140,8 +167,14 @@ function renderList(list) {
       return;
    }
 
+   const sorted = list.slice().sort((a, b) =>
+      listSort === 'name'
+         ? a.row_one.localeCompare(b.row_one)
+         : a.date.localeCompare(b.date)
+   );
+
    const today = getDateFormat();
-   list.forEach(entry => {
+   sorted.forEach(entry => {
       const expired = entry.date < today;
       const item    = document.createElement('div');
       item.className = 'list-item' + (expired ? ' expired' : '');
@@ -171,16 +204,13 @@ function renderList(list) {
 
       const delBtn = document.createElement('button');
       delBtn.className = 'btn-delete';
-      delBtn.setAttribute('data-swipe-ignore', 'true');
+
       delBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
       delBtn.addEventListener('click', () => deleteEntry(item));
 
       item.appendChild(info);
       item.appendChild(dateEl);
       item.appendChild(delBtn);
-
-      item.addEventListener('swiped-left',  () => deleteEntry(item));
-      item.addEventListener('swiped-right', () => deleteEntry(item));
 
       container.appendChild(item);
    });
@@ -216,6 +246,23 @@ function closeSheet() {
    document.getElementById('sheet-overlay').classList.remove('open');
    document.getElementById('delete-sheet').classList.remove('open');
 }
+
+// ── Swipe-down to close sheet ──────────────────────────────────────
+(function() {
+   const sheet = document.getElementById('delete-sheet');
+   let startY = null;
+
+   sheet.addEventListener('touchstart', function(e) {
+      startY = e.touches[0].clientY;
+   }, { passive: true });
+
+   sheet.addEventListener('touchend', function(e) {
+      if (startY === null) return;
+      const delta = e.changedTouches[0].clientY - startY;
+      startY = null;
+      if (delta > 60) closeSheet();
+   }, { passive: true });
+})();
 
 function deleteEntry(item) { openSheet(item); }
 
