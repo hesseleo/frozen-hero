@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "frozen-hero"
 version = "0.1.0"
-description = "Raspberry Pi freezer inventory management system"
+description = "Freezer Inventory Management System"
 requires-python = ">=3.11"
 dependencies = [
     # picamera2 is NOT listed here — it is a system package installed via apt

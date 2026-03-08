@@ -1,6 +1,6 @@
 # frozen-hero
 
-A Raspberry Pi-based freezer inventory system. Add items via a web UI — a QR-code label is printed automatically. When you take something out, hold the label in front of the camera: the motion sensor triggers a scan, the QR code is detected, and the item is removed from the inventory.
+A freezer inventory system. Add items via a web UI and a QR-code label is printed automatically. When you take something out, hold the label in front of the camera: the motion sensor triggers a scan, the QR code is detected, and the item is removed from the inventory.
 
 ## How it works
 
