@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-frozen-hero is a Raspberry Pi-based freezer inventory management system. Items are added via a web UI, which prints a QR-code label (using a Brother QL printer). A PIR motion detector triggers the Pi camera to scan for QR codes; when one is detected, the item is automatically removed from the database. The web interface runs at `http://hero-pi.hero.home:5000`.
+frozen-hero is a Raspberry Pi-based freezer inventory management system. Items are added via a web UI, which prints a QR-code label (using a Brother QL printer). A PIR motion detector triggers the Pi camera to scan for QR codes; when one is detected, the item is automatically removed from the database. The web interface runs at `http://<hostname>:5000`.
 
 **Hardware:** Raspberry Pi 3, Pi Camera (OV5647), PIR motion detector (GPIO 18), buzzer (GPIO 23), LED (GPIO 24), Brother QL-580N label printer.
 
@@ -23,10 +23,10 @@ source .venv/bin/activate
 pip install -e .
 
 # Permissions
-sudo usermod -aG video hero
+sudo usermod -aG video $USER
 
-# USB printer rule: /etc/udev/rules.d/99-brother.rules
-# SUBSYSTEM=="usb", ATTRS{idVendor}=="04f9", ATTRS{idProduct}=="20c0", MODE="0666"
+# USB printer rule
+sudo sh -c 'echo "SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"04f9\", ATTRS{idProduct}==\"20c0\", MODE=\"0666\"" > /etc/udev/rules.d/99-brother.rules'
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
@@ -68,7 +68,6 @@ frozen-hero/
 │       ├── db.py            # SQLite data-access layer (parameterised queries)
 │       ├── scanner.py       # QRCodeScanner (GPIO + picamera2)
 │       └── label.py         # label generation + printing
-├── autostart/frozen-hero.service
 ├── templates/index.html
 ├── database/                # gitignored
 ├── images/
@@ -91,9 +90,11 @@ All queries use `?` parameterised placeholders — no SQL injection possible.
 - `delete_entry(entry_id) -> bool`
 
 ### `src/frozen_hero/label.py`
-Public function: `print_label(row_one, row_two, date_str, entry_id) -> None`
+Public functions: `generate_label(...) -> Path`, `print_label(label_path) -> None`
 - All subprocess calls use `subprocess.run(list, shell=False)` — no shell injection.
 - User text is escaped with `xml.sax.saxutils.escape()` before Pango markup embedding.
+- `_APP_VERSION` is set at import time from `__version__` and printed in the label footer.
+- Label layout (bottom to top): footer strip (`Frozen HeRo` + version), separator, best-before date, subtitle, title.
 
 ### `src/frozen_hero/scanner.py` — `QRCodeScanner`
 - GPIO-driven: PIR sensor interrupt → `start_scan()`
@@ -112,14 +113,15 @@ Public function: `print_label(row_one, row_two, date_str, entry_id) -> None`
 ### `templates/index.html`
 Single-page app (vanilla JS, no framework). Two tabs: "Neues Label" (add item + print) and "Liste anzeigen" (inventory table). Swipe left/right on a row to delete it. Uses relative API URLs.
 
-## Systemd Services
+## Systemd Service
 
-| File | Purpose |
-|---|---|
-| `autostart/frozen-hero.service` | Runs `python -m frozen_hero` as user `hero` on boot |
-| `backup/frozen-hero-db-backup.service` + `.timer` | Copies DB to NAS (`//hero-nas.hero.home/Backup`) daily at 18:00 |
+The service file template is in the README. Deploy to `/etc/systemd/system/frozen-hero.service` with `User` adjusted, then:
 
-Deploy service files to `/etc/systemd/system/` and enable with `systemctl enable --now <service>`.
+```bash
+sudo systemctl enable --now frozen-hero
+```
+
+The `autostart/` and `backup/` directories are gitignored (contain instance-specific configs).
 
 ## Label Size Configuration
 
