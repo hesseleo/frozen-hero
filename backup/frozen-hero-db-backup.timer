@@ -1,9 +1,0 @@
-[Unit]
-Description=frozen-hero Database Backup Timer
-
-[Timer]
-OnCalendar=*-*-* 18:00:00
-Persistent=true
-
-[Install]
-WantedBy=timers.target

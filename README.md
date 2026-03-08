@@ -40,11 +40,17 @@ sudo apt install libzbar0 swig liblgpio-dev qrencode imagemagick libcap-dev \
 sudo apt install ./utils/ql600pdrv-3.1.5-0.armhf.deb
 ```
 
+### Clone this repository into your home directory
+```bash
+git clone https://github.com/hesseleo/frozen-hero.git ~/frozen-hero
+```
+
 ### Python environment
 
 picamera2 is only available as a system package, so the venv must include system site-packages:
 
 ```bash
+cd ~/frozen-hero
 python -m venv .venv --system-site-packages
 source .venv/bin/activate
 pip install -e .
@@ -56,70 +62,41 @@ pip install -e .
 # Camera access
 sudo usermod -aG video hero
 
-# USB printer access — create /etc/udev/rules.d/99-brother.rules:
-# SUBSYSTEM=="usb", ATTRS{idVendor}=="04f9", ATTRS{idProduct}=="20c0", MODE="0666"
+# USB printer access
+sudo sh -c 'echo "SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"04f9\", ATTRS{idProduct}==\"20c0\", MODE=\"0666\"" > /etc/udev/rules.d/99-brother.rules'
 sudo udevadm control --reload-rules && sudo udevadm trigger
 ```
 
 ### Autostart
 
-```bash
-sudo cp autostart/frozen-hero.service /etc/systemd/system/
-sudo systemctl enable --now frozen-hero
+Create `/etc/systemd/system/frozen-hero.service` and adjust `User`.
+
+```ini
+[Unit]
+Description=frozen-hero Freezer Management System
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+WorkingDirectory=%h/frozen-hero
+Environment="PATH=%h/frozen-hero/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=%h/frozen-hero/.venv/bin/python -m frozen_hero
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-### Database backup (optional)
-
-Copies the SQLite database to a NAS share daily at 18:00:
-
 ```bash
-sudo cp backup/frozen-hero-db-backup.service backup/frozen-hero-db-backup.timer /etc/systemd/system/
-sudo systemctl enable --now frozen-hero-db-backup.timer
+sudo systemctl enable --now frozen-hero
 ```
 
 ## Running
 
 ```bash
-# Production (waitress + QR scanner)
 python -m frozen_hero
-
-# Flask dev server only (no waitress, no hardware needed)
-python -m frozen_hero --web-debug
-
-# Verbose logging
-python -m frozen_hero --debug
 ```
 
-The web UI is available at `http://hero-pi.hero.home:5000`.
-
-Do not run as root.
-
-## Project structure
-
-```
-frozen-hero/
-├── src/frozen_hero/
-│   ├── __main__.py   # entry point (argparse, signal handling)
-│   ├── config.py     # all constants (paths, GPIO pins, printer settings)
-│   ├── app.py        # Flask app + routes
-│   ├── db.py         # SQLite data-access layer
-│   ├── scanner.py    # PIR + camera QR scanner
-│   └── label.py      # label generation and printing
-├── templates/
-│   └── index.html    # single-page web UI
-├── autostart/        # systemd service
-└── backup/           # backup service and timer
-```
-
-## Development
-
-```bash
-# Lint
-ruff check src/
-
-# Type-check
-mypy src/
-
-# Smoke-test Flask routes without hardware
-flask --app "frozen_hero.app:create_app" run
-```
+The web UI is available at `http://<HOSTNAME>:5000`.

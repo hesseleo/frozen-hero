@@ -1,4 +1,6 @@
 __pycache__/
+autostart/
+backup/
 database/
 .mypy_cache/
 .ruff_cache/
