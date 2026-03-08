@@ -35,8 +35,10 @@ Python · Flask · SQLite · picamera2 · pyzbar · brother_ql · waitress · Im
 ### System dependencies
 
 ```bash
-sudo apt install libzbar0 swig liblgpio-dev qrencode imagemagick libcap-dev \
-                 python3-libcamera python3-picamera2
+sudo apt install libzbar0 swig liblgpio-dev qrencode imagemagick libcap-dev python3-libcamera python3-picamera2
+```
+
+```bash
 sudo apt install ./utils/ql600pdrv-3.1.5-0.armhf.deb
 ```
 
