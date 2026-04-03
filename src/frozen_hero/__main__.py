@@ -1,7 +1,7 @@
 """Entry point for frozen-hero.
 
 Run with:
-    python -m frozen_hero [--debug] [--web-debug] [--no-hardware]
+    python -m frozen_hero [--debug] [--web-debug] [--no-hardware] [--test-sensor]
 """
 
 import argparse
@@ -9,6 +9,7 @@ import logging
 import os
 import signal
 import sys
+import time
 from threading import Thread
 
 from frozen_hero import config, db
@@ -53,6 +54,11 @@ def main() -> None:
         action="store_true",
         help="Template mode: generate label preview only, skip DB and printer",
     )
+    parser.add_argument(
+        "--test-sensor",
+        action="store_true",
+        help="Test mode: beep buzzer on motion, skip camera/QR/Flask",
+    )
     args = parser.parse_args()
 
     _configure_logging(args.debug)
@@ -61,6 +67,27 @@ def main() -> None:
         sys.exit("Running this program with root permission is not allowed.")
 
     signal.signal(signal.SIGINT, _signal_handler)
+
+    if args.test_sensor:
+        import lgpio
+
+        from frozen_hero.scanner import _make_sensor
+
+        chip = lgpio.gpiochip_open(0)
+        lgpio.gpio_claim_output(chip, config.PIN_BUZZER, 0)
+
+        def _test_beep() -> None:
+            logger.info("Motion detected — beeping buzzer")
+            lgpio.gpio_write(chip, config.PIN_BUZZER, 1)
+            time.sleep(config.BUZZER_BEEP_SECONDS)
+            lgpio.gpio_write(chip, config.PIN_BUZZER, 0)
+
+        _make_sensor(chip, lambda: Thread(target=_test_beep, daemon=True).start())
+        logger.info(
+            "Sensor test mode active (sensor=%s) — Ctrl+C to exit", config.MOTION_SENSOR
+        )
+        signal.pause()
+        return
 
     app = create_app(template_mode=args.template)
 
@@ -74,7 +101,7 @@ def main() -> None:
             else:
                 logger.warning("QR code detected but entry %d not found", entry_id)
 
-        _scanner = QRCodeScanner(callback=on_qr_detected)
+        _scanner = QRCodeScanner(callback=on_qr_detected, sensor_type=config.MOTION_SENSOR)
         logger.info("QR code scanner ready")
     else:
         logger.info("Hardware disabled — scanner not started")

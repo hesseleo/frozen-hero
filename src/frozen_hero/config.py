@@ -24,13 +24,24 @@ SERVER_PORT: int = 5000
 # ---------------------------------------------------------------------------
 # GPIO pins (BCM numbering)
 # ---------------------------------------------------------------------------
-PIN_MOTION_DETECTOR: int = 18
-PIN_BUZZER: int = 23
-PIN_LED: int = 24
+PIN_BUZZER: int = 24       # swapped per test wiring (was 23)
+PIN_LED: int = 23          # swapped per test wiring (was 24)
 
-# Debounce time for the PIR motion detector alert (microseconds).
-# Suppresses rapid chatter on the rising edge without delaying real events.
+# ---------------------------------------------------------------------------
+# Motion sensor selection
+# ---------------------------------------------------------------------------
+# Change to "apds9960" to use the APDS-9960 proximity sensor instead of PIR.
+MOTION_SENSOR: str = "apds9960"
+
+# PIR motion sensor
+PIN_PIR: int = 18
 PIN_MOTION_DEBOUNCE_US: int = 300_000
+
+# APDS-9960 proximity sensor
+PIN_APDS9960_INT: int = 4               # INT pin (active-low)
+APDS9960_PROXIMITY_THRESHOLD: int = 70  # 0–255; ~10cm triggers ~110, noise ~5
+APDS9960_LED_DRIVE: int = 3             # 0=100mA, 1=50mA, 2=25mA, 3=12.5mA
+APDS9960_PROXIMITY_GAIN: int = 0        # 0=1x, 1=2x, 2=4x, 3=8x
 
 # ---------------------------------------------------------------------------
 # Camera

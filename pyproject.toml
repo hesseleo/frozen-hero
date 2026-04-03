@@ -26,6 +26,8 @@ dependencies = [
     "lgpio",
     "pyzbar",
     "brother-ql",
+    "apds9960",
+    "smbus2",
 ]
 
 [project.urls]
@@ -88,5 +90,7 @@ module = [
     "picamera2.*",
     "pyzbar.*",
     "brother_ql.*",
+    "smbus2",
+    "apds9960",
 ]
 ignore_missing_imports = true
