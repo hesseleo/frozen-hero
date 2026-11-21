@@ -14,20 +14,15 @@ frozen-hero is a Raspberry Pi-based freezer inventory management system. Items a
 
 ```bash
 # System dependencies (on the Pi)
-sudo apt install libzbar0 swig liblgpio-dev qrencode imagemagick libcap-dev python3-libcamera python3-picamera2
-sudo apt install ./utils/ql600pdrv-3.1.5-0.armhf.deb
+sudo apt install libzbar0t64 swig liblgpio-dev qrencode imagemagick libcap-dev python3-libcamera python3-picamera2
 
 # Python environment (must use --system-site-packages for picamera2)
 python -m venv .venv --system-site-packages
 source .venv/bin/activate
 pip install -e .
 
-# Permissions
-sudo usermod -aG video $USER
-
-# USB printer rule
-sudo sh -c 'echo "SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"04f9\", ATTRS{idProduct}==\"20c0\", MODE=\"0666\"" > /etc/udev/rules.d/99-brother.rules'
-sudo udevadm control --reload-rules && sudo udevadm trigger
+# Permissions: camera, GPIO, printer at /dev/usb/lp0
+sudo usermod -aG video,gpio,lp $USER
 ```
 
 ## Running the Application

@@ -35,12 +35,10 @@ Python · Flask · SQLite · picamera2 · pyzbar · brother_ql · waitress · Im
 ### System dependencies
 
 ```bash
-sudo apt install libzbar0 swig liblgpio-dev qrencode imagemagick libcap-dev python3-libcamera python3-picamera2
+sudo apt install libzbar0t64 swig liblgpio-dev qrencode imagemagick libcap-dev python3-libcamera python3-picamera2
 ```
 
-```bash
-sudo apt install ./utils/ql600pdrv-3.1.5-0.armhf.deb
-```
+The label printer is used at `/dev/usb/lp0`.
 
 ### Clone this repository into your home directory
 ```bash
@@ -60,13 +58,15 @@ pip install -e .
 
 ### Permissions
 
+Camera (`video`), GPIO pins (`gpio`) and the printer (`lp`):
+
 ```bash
-sudo usermod -aG video,lp $USER
+sudo usermod -aG video,gpio,lp $USER
 ```
 
 ### Autostart
 
-Create `/etc/systemd/system/frozen-hero.service` and adjust `User`.
+Create `/etc/systemd/system/frozen-hero.service` and replace `YOUR_USERNAME`.
 
 ```ini
 [Unit]
@@ -76,9 +76,9 @@ After=network.target
 [Service]
 Type=simple
 User=YOUR_USERNAME
-WorkingDirectory=%h/frozen-hero
-Environment="PATH=%h/frozen-hero/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-ExecStart=%h/frozen-hero/.venv/bin/python -m frozen_hero
+WorkingDirectory=/home/YOUR_USERNAME/frozen-hero
+Environment="PATH=/home/YOUR_USERNAME/frozen-hero/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/home/YOUR_USERNAME/frozen-hero/.venv/bin/python -m frozen_hero
 Restart=on-failure
 RestartSec=5
 
@@ -97,6 +97,11 @@ python -m frozen_hero
 ```
 
 The web UI is available at `http://<HOSTNAME>:5000`.
+
+The SQLite database is `database/frozen-hero.db` (not in git). A consistent
+backup copy can be taken while the app runs, e.g. `sqlite3 -readonly
+database/frozen-hero.db .dump > frozen-hero.sql` (restore with
+`sqlite3 database/frozen-hero.db < frozen-hero.sql`).
 
 ## Releasing
 
